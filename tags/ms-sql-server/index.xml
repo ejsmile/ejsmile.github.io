@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Ms Sql Server on Павел Карасов</title>
+    <link>http://p.karasov.net/tags/ms-sql-server/</link>
+    <description>Recent content in Ms Sql Server on Павел Карасов</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ru-ru</language>
+    <copyright>Copyright &amp;copy; 2018 - Карасов Павел</copyright>
+    <lastBuildDate>Wed, 03 May 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="http://p.karasov.net/tags/ms-sql-server/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Эксперименты над олимпиадной задачей</title>
+      <link>http://p.karasov.net/post/1s-olympiad-problems/</link>
+      <pubDate>Wed, 03 May 2017 00:00:00 +0000</pubDate>
+      
+      <guid>http://p.karasov.net/post/1s-olympiad-problems/</guid>
+      <description>&lt;p&gt;Так получилось, что я попал в магистратуру, и как то гуляя мимо кафедры на глаза попалась олимпиадная задача по 1С. Кратко задача звучит так: &amp;ldquo;Есть записи продажи за каждый день, необходимо найти наибольший период когда план выполнялся&amp;rdquo;. А потом когда я гулял со спящей дочкой у меня встав вопрос, а сколькими способами это можно сделать на SQL. Решения будут на основе MS SQL.&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

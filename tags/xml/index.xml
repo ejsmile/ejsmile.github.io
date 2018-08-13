@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Xml on Павел Карасов</title>
+    <link>http://p.karasov.net/tags/xml/</link>
+    <description>Recent content in Xml on Павел Карасов</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ru-ru</language>
+    <copyright>Copyright &amp;copy; 2018 - Карасов Павел</copyright>
+    <lastBuildDate>Mon, 13 Feb 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="http://p.karasov.net/tags/xml/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>1С магия XDTO-пакетов на примере интеграций с ГИС ЖКХ</title>
+      <link>http://p.karasov.net/post/1s-xdto-gis--zkh/</link>
+      <pubDate>Mon, 13 Feb 2017 00:00:00 +0000</pubDate>
+      
+      <guid>http://p.karasov.net/post/1s-xdto-gis--zkh/</guid>
+      <description>&lt;p&gt;Есть очень много статей о том, как работать с XSL/XSD из 1С, но все они в стиле: возьмем нашу XSD схему (простую и удбоную) или наш web-сервис и смотрите, как все легко экспортировать или импортировать. А что делать, если нам дали пачку XSD-схем со сложным взаимосвязями и изменять мы них не можем, а работать и поддерживать актуальность схем надо?&lt;/p&gt;
+
+&lt;p&gt;&lt;/p&gt;</description>
+    </item>
+    
+  </channel>
+</rss>

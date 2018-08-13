@@ -1,0 +1,626 @@
+<!doctype html>
+
+<html lang="ru-ru">
+
+<head>
+  <title>Павел Карасов</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="The HTML5 Herald" />
+  <meta name="author" content="" />
+  <meta name="generator" content="Hugo 0.45" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda" />
+  <link rel="stylesheet" type="text/css" href="http://p.karasov.net/css/styles.css" />
+</head>
+
+<body>
+  <div id="container">
+    <header>
+      <h1>
+                <a href="http://p.karasov.net/">Павел Карасов</a>
+            </h1>
+
+<ul id="social-media">
+          
+        <li><a href="https://github.com/ejsmile"><i class="fa fa-github fa-lg" aria-hidden="true"></i></a></li>
+           
+      </ul>      
+      <p><em>Программист C#. Любитель наводить порядок</em></p>
+      
+    </header>
+
+    
+<nav>
+    <ul>
+        
+    </ul>
+</nav>
+
+    <main>
+
+
+
+
+<article>
+
+    <h1>1С магия XDTO-пакетов на примере интеграций с ГИС ЖКХ</h1>
+
+    
+        <aside>
+    <ul>
+        <li>
+            <time class="post-date" datetime="2017-02-13T00:00:00Z">Feb 13, 2017</time>
+        </li>
+        
+        
+
+        
+        <li>
+            <em>
+                
+                    
+                    <a href="http://p.karasov.net/tags/1c/">#1c</a>
+                
+                    , 
+                    <a href="http://p.karasov.net/tags/xml/">#XML</a>
+                
+                    , 
+                    <a href="http://p.karasov.net/tags/xdto/">#XDTO</a>
+                
+            </em>
+        </li>
+        
+
+        <li>6 min read</li>
+    </ul>
+</aside>
+    
+
+    <p>Есть очень много статей о том, как работать с XSL/XSD из 1С, но все они в стиле: возьмем нашу XSD схему (простую и удбоную) или наш web-сервис и смотрите, как все легко экспортировать или импортировать. А что делать, если нам дали пачку XSD-схем со сложным взаимосвязями и изменять мы них не можем, а работать и поддерживать актуальность схем надо?</p>
+
+<p></p>
+
+
+<figure class="float-right">
+    
+        <img src="https://habrastorage.org/files/9dc/a04/d67/9dca04d67c744c61851fe829e8a5fed9.JPG" />
+    
+    
+</figure>
+
+
+<p><strong>Сразу скажу, вопросы шифрования/подписи по ГОСТУ при работе с ГИС ЖКХ за рамками этой статьи. Хотя без подписей запросы выполнить не удастся.</strong></p>
+
+<p>Начнем с простого - скачаем пакет форматов <a href="https://dom.gosuslugi.ru/#!/regulations">по интеграционному взаимодействию  с ГИС ЖКХ</a>, импортируем все xsd схемы из пакета интеграций, наведем порядок переименуем все как нам удобно. В итоге получим как показано на картинке:</p>
+
+<p>Ну а теперь приступим к магии. Попробуем запросить данные из справочника организаций по ОРГН. Это подсистема organizations-registry-common метод exportOrgRegist.</p>
+
+<p>В hcs-organizations-registry-common-service.wsdl указано:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml">...
+<span style="color:#f92672">&lt;wsdl:message</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;exportOrgRegistryRequest&#34;</span><span style="color:#f92672">&gt;</span>
+  <span style="color:#f92672">&lt;wsdl:part</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;exportOrgRegistryRequest&#34;</span> <span style="color:#a6e22e">element=</span><span style="color:#e6db74">&#34;ro:exportOrgRegistryRequest&#34;</span><span style="color:#f92672">/&gt;</span>
+<span style="color:#f92672">&lt;/wsdl:message&gt;</span>
+<span style="color:#f92672">&lt;wsdl:message</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;exportOrgRegistryResult&#34;</span><span style="color:#f92672">&gt;</span>
+  <span style="color:#f92672">&lt;wsdl:part</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;exportOrgRegistryResult&#34;</span> <span style="color:#a6e22e">element=</span><span style="color:#e6db74">&#34;ro:exportOrgRegistryResult&#34;</span><span style="color:#f92672">/&gt;</span>
+<span style="color:#f92672">&lt;/wsdl:message&gt;</span>
+...
+<span style="color:#f92672">&lt;wsdl:message</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;ISRequestHeader&#34;</span><span style="color:#f92672">&gt;</span>
+  <span style="color:#f92672">&lt;wsdl:part</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;Header&#34;</span> <span style="color:#a6e22e">element=</span><span style="color:#e6db74">&#34;ISRequestHeader&#34;</span><span style="color:#f92672">/&gt;</span>
+<span style="color:#f92672">&lt;/wsdl:message&gt;</span>
+
+...
+
+<span style="color:#f92672">&lt;wsdl:operation</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;exportOrgRegistry&#34;</span><span style="color:#f92672">&gt;</span>
+  <span style="color:#f92672">&lt;wsdl:documentation&gt;</span>экспорт сведений об организациях<span style="color:#f92672">&lt;/wsdl:documentation&gt;</span>
+  <span style="color:#f92672">&lt;wsdl:input</span> <span style="color:#a6e22e">message=</span><span style="color:#e6db74">&#34;tns:exportOrgRegistryRequest&#34;</span><span style="color:#f92672">/&gt;</span>
+  <span style="color:#f92672">&lt;wsdl:output</span> <span style="color:#a6e22e">message=</span><span style="color:#e6db74">&#34;tns:exportOrgRegistryResult&#34;</span><span style="color:#f92672">/&gt;</span>
+  <span style="color:#f92672">&lt;wsdl:fault</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;InvalidRequest&#34;</span> <span style="color:#a6e22e">message=</span><span style="color:#e6db74">&#34;tns:Fault&#34;</span><span style="color:#f92672">/&gt;</span>
+<span style="color:#f92672">&lt;/wsdl:operation&gt;</span>
+
+...
+
+<span style="color:#f92672">&lt;wsdl:operation</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;exportOrgRegistry&#34;</span><span style="color:#f92672">&gt;</span>
+  <span style="color:#f92672">&lt;soap:operation</span> <span style="color:#a6e22e">soapAction=</span><span style="color:#e6db74">&#34;urn:exportOrgRegistry&#34;</span><span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;wsdl:input&gt;</span>
+      <span style="color:#f92672">&lt;soap:body</span> <span style="color:#a6e22e">use=</span><span style="color:#e6db74">&#34;literal&#34;</span><span style="color:#f92672">/&gt;</span>
+      <span style="color:#f92672">&lt;soap:header</span> <span style="color:#a6e22e">message=</span><span style="color:#e6db74">&#34;tns:ISRequestHeader&#34;</span> <span style="color:#a6e22e">part=</span><span style="color:#e6db74">&#34;Header&#34;</span> <span style="color:#a6e22e">use=</span><span style="color:#e6db74">&#34;literal&#34;</span><span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;/wsdl:input&gt;</span>
+    <span style="color:#f92672">&lt;wsdl:output&gt;</span>
+      <span style="color:#f92672">&lt;soap:body</span> <span style="color:#a6e22e">use=</span><span style="color:#e6db74">&#34;literal&#34;</span><span style="color:#f92672">/&gt;</span>
+      <span style="color:#f92672">&lt;soap:header</span> <span style="color:#a6e22e">message=</span><span style="color:#e6db74">&#34;tns:ResultHeader&#34;</span> <span style="color:#a6e22e">part=</span><span style="color:#e6db74">&#34;Header&#34;</span> <span style="color:#a6e22e">use=</span><span style="color:#e6db74">&#34;literal&#34;</span><span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;/wsdl:output&gt;</span>
+    <span style="color:#f92672">&lt;wsdl:fault</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;InvalidRequest&#34;</span><span style="color:#f92672">&gt;</span>
+      <span style="color:#f92672">&lt;soap:fault</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;InvalidRequest&#34;</span> <span style="color:#a6e22e">use=</span><span style="color:#e6db74">&#34;literal&#34;</span><span style="color:#f92672">/&gt;</span>
+    <span style="color:#f92672">&lt;/wsdl:fault&gt;</span>
+<span style="color:#f92672">&lt;/wsdl:operation&gt;</span></code></pre></div>
+<p>Надо собрать SOAP пакет из заголовка ISRequestHeader, тела exportOrgRegistryRequest. Посмотрим их в xsd схемах  спецификаций по интеграций.</p>
+
+<p><details></p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml">...
+  <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;ISRequestHeader&#34;</span> <span style="color:#a6e22e">type=</span><span style="color:#e6db74">&#34;tns:HeaderType&#34;</span><span style="color:#f92672">&gt;</span>
+    <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+      <span style="color:#f92672">&lt;xs:documentation&gt;</span>Заголовок запроса<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+    <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+    <span style="color:#f92672">&lt;/xs:element&gt;</span> 
+...
+   <span style="color:#f92672">&lt;xs:complexType</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;HeaderType&#34;</span><span style="color:#f92672">&gt;</span>
+      <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+         <span style="color:#f92672">&lt;xs:documentation&gt;</span>Базовый тип заголовка<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+      <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+   <span style="color:#f92672">&lt;xs:sequence&gt;</span>
+      <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;Date&#34;</span> <span style="color:#a6e22e">type=</span><span style="color:#e6db74">&#34;xs:dateTime&#34;</span><span style="color:#f92672">&gt;</span>
+         <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+            <span style="color:#f92672">&lt;xs:documentation&gt;</span>Дата отправки пакета<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+         <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+      <span style="color:#f92672">&lt;/xs:element&gt;</span>
+      <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;MessageGUID&#34;</span> <span style="color:#a6e22e">type=</span><span style="color:#e6db74">&#34;tns:GUIDType&#34;</span><span style="color:#f92672">&gt;</span>
+         <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+            <span style="color:#f92672">&lt;xs:documentation&gt;</span>Идентификатор сообщения<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+         <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+      <span style="color:#f92672">&lt;/xs:element&gt;</span>
+      <span style="color:#f92672">&lt;/xs:sequence&gt;</span>
+   <span style="color:#f92672">&lt;/xs:complexType&gt;</span>    
+...
+   <span style="color:#f92672">&lt;xs:simpleType</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;GUIDType&#34;</span><span style="color:#f92672">&gt;</span>
+      <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+         <span style="color:#f92672">&lt;xs:documentation&gt;</span>GUID-тип.<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+      <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+      <span style="color:#f92672">&lt;xs:restriction</span> <span style="color:#a6e22e">base=</span><span style="color:#e6db74">&#34;xs:string&#34;</span><span style="color:#f92672">&gt;</span>
+         <span style="color:#f92672">&lt;xs:pattern</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;([0-9a-fA-F]){8}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){4}-([0-9a-fA-F]){12}&#34;</span><span style="color:#f92672">/&gt;</span>
+      <span style="color:#f92672">&lt;/xs:restriction&gt;</span>
+   <span style="color:#f92672">&lt;/xs:simpleType&gt;</span>
+...
+<span style="color:#f92672">&lt;/source&gt;&lt;/spoiler&gt;</span>
+<span style="color:#f92672">&lt;spoiler</span> <span style="color:#a6e22e">title=</span><span style="color:#e6db74">&#34;hcs-organizations-base.xsd&#34;</span><span style="color:#f92672">&gt;&lt;source</span> <span style="color:#a6e22e">lang=</span><span style="color:#e6db74">&#34;xml&#34;</span><span style="color:#f92672">&gt;</span>
+...
+   <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;OGRN&#34;</span> <span style="color:#a6e22e">type=</span><span style="color:#e6db74">&#34;tns:OGRNType&#34;</span><span style="color:#f92672">&gt;</span>
+      <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+         <span style="color:#f92672">&lt;xs:documentation&gt;</span>ОГРН<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+      <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+   <span style="color:#f92672">&lt;/xs:element&gt;</span>
+   <span style="color:#f92672">&lt;xs:simpleType</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;OGRNType&#34;</span><span style="color:#f92672">&gt;</span>
+      <span style="color:#f92672">&lt;xs:restriction</span> <span style="color:#a6e22e">base=</span><span style="color:#e6db74">&#34;xs:string&#34;</span><span style="color:#f92672">&gt;</span>
+         <span style="color:#f92672">&lt;xs:length</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;13&#34;</span><span style="color:#f92672">/&gt;</span>
+      <span style="color:#f92672">&lt;/xs:restriction&gt;</span>
+   <span style="color:#f92672">&lt;/xs:simpleType&gt;</span>
+...
+<span style="color:#f92672">&lt;/source&gt;&lt;/spoiler&gt;</span>
+<span style="color:#f92672">&lt;spoiler</span> <span style="color:#a6e22e">title=</span><span style="color:#e6db74">&#34;hcs-organizations-registry-common-types.xsd&#34;</span><span style="color:#f92672">&gt;&lt;source</span> <span style="color:#a6e22e">lang=</span><span style="color:#e6db74">&#34;xml&#34;</span><span style="color:#f92672">&gt;</span>
+...
+<span style="color:#75715e">&lt;!--Экспорт из реестра организаций--&gt;</span>
+  <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;exportOrgRegistryRequest&#34;</span><span style="color:#f92672">&gt;</span>
+    <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+      <span style="color:#f92672">&lt;xs:documentation&gt;</span>Экспорт сведений из реестра организаций<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+    <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+    <span style="color:#f92672">&lt;xs:complexType&gt;</span>
+      <span style="color:#f92672">&lt;xs:complexContent&gt;</span>
+        <span style="color:#f92672">&lt;xs:extension</span> <span style="color:#a6e22e">base=</span><span style="color:#e6db74">&#34;base:BaseType&#34;</span><span style="color:#f92672">&gt;</span>
+          <span style="color:#f92672">&lt;xs:sequence&gt;</span>
+            <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;SearchCriteria&#34;</span> <span style="color:#a6e22e">maxOccurs=</span><span style="color:#e6db74">&#34;100&#34;</span><span style="color:#f92672">&gt;</span>
+              <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+                <span style="color:#f92672">&lt;xs:documentation&gt;</span>Критерий поиска организаций.<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+              <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+              <span style="color:#f92672">&lt;xs:complexType&gt;</span>
+                <span style="color:#f92672">&lt;xs:sequence&gt;</span>
+                  <span style="color:#f92672">&lt;xs:choice&gt;</span>
+                    <span style="color:#f92672">&lt;xs:choice&gt;</span>
+                      <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+                        <span style="color:#f92672">&lt;xs:documentation&gt;</span>Поиск по реквизитам.<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+                      <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+                      <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">ref=</span><span style="color:#e6db74">&#34;organizations-base:OGRNIP&#34;</span><span style="color:#f92672">/&gt;</span>
+                      <span style="color:#f92672">&lt;xs:sequence&gt;</span>
+                        <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">ref=</span><span style="color:#e6db74">&#34;organizations-base:OGRN&#34;</span><span style="color:#f92672">/&gt;</span>
+                        <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">ref=</span><span style="color:#e6db74">&#34;organizations-base:KPP&#34;</span> <span style="color:#a6e22e">minOccurs=</span><span style="color:#e6db74">&#34;0&#34;</span><span style="color:#f92672">/&gt;</span>
+                      <span style="color:#f92672">&lt;/xs:sequence&gt;</span>
+                      <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">ref=</span><span style="color:#e6db74">&#34;organizations-base:NZA&#34;</span><span style="color:#f92672">/&gt;</span>
+                    <span style="color:#f92672">&lt;/xs:choice&gt;</span>
+                    <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">ref=</span><span style="color:#e6db74">&#34;organizations-registry-base:orgVersionGUID&#34;</span><span style="color:#f92672">/&gt;</span>
+                    <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">ref=</span><span style="color:#e6db74">&#34;organizations-registry-base:orgRootEntityGUID&#34;</span><span style="color:#f92672">/&gt;</span>
+                  <span style="color:#f92672">&lt;/xs:choice&gt;</span>
+                  <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;isRegistered&#34;</span> <span style="color:#a6e22e">type=</span><span style="color:#e6db74">&#34;xs:boolean&#34;</span> <span style="color:#a6e22e">fixed=</span><span style="color:#e6db74">&#34;true&#34;</span> <span style="color:#a6e22e">minOccurs=</span><span style="color:#e6db74">&#34;0&#34;</span><span style="color:#f92672">&gt;</span>
+                    <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+                      <span style="color:#f92672">&lt;xs:documentation&gt;</span>Поиск среди организаций, имеющих личных кабинет<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+                    <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+                  <span style="color:#f92672">&lt;/xs:element&gt;</span>
+                <span style="color:#f92672">&lt;/xs:sequence&gt;</span>
+              <span style="color:#f92672">&lt;/xs:complexType&gt;</span>
+            <span style="color:#f92672">&lt;/xs:element&gt;</span>
+            <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;lastEditingDateFrom&#34;</span> <span style="color:#a6e22e">type=</span><span style="color:#e6db74">&#34;xs:date&#34;</span> <span style="color:#a6e22e">minOccurs=</span><span style="color:#e6db74">&#34;0&#34;</span><span style="color:#f92672">&gt;</span>
+              <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+                <span style="color:#f92672">&lt;xs:documentation&gt;</span>Время последнего изменения (от)<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+              <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+            <span style="color:#f92672">&lt;/xs:element&gt;</span>
+          <span style="color:#f92672">&lt;/xs:sequence&gt;</span>
+          <span style="color:#f92672">&lt;xs:attribute</span> <span style="color:#a6e22e">ref=</span><span style="color:#e6db74">&#34;base:version&#34;</span> <span style="color:#a6e22e">use=</span><span style="color:#e6db74">&#34;required&#34;</span> <span style="color:#a6e22e">fixed=</span><span style="color:#e6db74">&#34;10.0.2.1&#34;</span><span style="color:#f92672">/&gt;</span>
+        <span style="color:#f92672">&lt;/xs:extension&gt;</span>
+      <span style="color:#f92672">&lt;/xs:complexContent&gt;</span>
+    <span style="color:#f92672">&lt;/xs:complexType&gt;</span>
+  <span style="color:#f92672">&lt;/xs:element&gt;</span>
+  <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;exportOrgRegistryResult&#34;</span><span style="color:#f92672">&gt;</span>
+    <span style="color:#f92672">&lt;xs:complexType&gt;</span>
+      <span style="color:#f92672">&lt;xs:complexContent&gt;</span>
+        <span style="color:#f92672">&lt;xs:extension</span> <span style="color:#a6e22e">base=</span><span style="color:#e6db74">&#34;base:BaseType&#34;</span><span style="color:#f92672">&gt;</span>
+          <span style="color:#f92672">&lt;xs:choice&gt;</span>
+            <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">ref=</span><span style="color:#e6db74">&#34;base:ErrorMessage&#34;</span><span style="color:#f92672">/&gt;</span>
+            <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;OrgData&#34;</span> <span style="color:#a6e22e">type=</span><span style="color:#e6db74">&#34;tns:exportOrgRegistryResultType&#34;</span> <span style="color:#a6e22e">minOccurs=</span><span style="color:#e6db74">&#34;0&#34;</span> <span style="color:#a6e22e">maxOccurs=</span><span style="color:#e6db74">&#34;unbounded&#34;</span><span style="color:#f92672">&gt;</span>
+              <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+                <span style="color:#f92672">&lt;xs:documentation&gt;</span>Найденная организация.<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+              <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+            <span style="color:#f92672">&lt;/xs:element&gt;</span>
+          <span style="color:#f92672">&lt;/xs:choice&gt;</span>
+          <span style="color:#f92672">&lt;xs:attribute</span> <span style="color:#a6e22e">ref=</span><span style="color:#e6db74">&#34;base:version&#34;</span> <span style="color:#a6e22e">use=</span><span style="color:#e6db74">&#34;required&#34;</span> <span style="color:#a6e22e">fixed=</span><span style="color:#e6db74">&#34;10.0.2.1&#34;</span><span style="color:#f92672">/&gt;</span>
+        <span style="color:#f92672">&lt;/xs:extension&gt;</span>
+      <span style="color:#f92672">&lt;/xs:complexContent&gt;</span>
+    <span style="color:#f92672">&lt;/xs:complexType&gt;</span>
+  <span style="color:#f92672">&lt;/xs:element&gt;</span>
+  <span style="color:#f92672">&lt;xs:complexType</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;exportOrgRegistryResultType&#34;</span><span style="color:#f92672">&gt;</span>
+    <span style="color:#f92672">&lt;xs:sequence&gt;</span>
+      <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">ref=</span><span style="color:#e6db74">&#34;organizations-registry-base:orgRootEntityGUID&#34;</span><span style="color:#f92672">/&gt;</span>
+      <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;OrgVersion&#34;</span><span style="color:#f92672">&gt;</span>
+        <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+          <span style="color:#f92672">&lt;xs:documentation&gt;</span>Версия организации в реестре организаций<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+        <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+        <span style="color:#f92672">&lt;xs:complexType&gt;</span>
+          <span style="color:#f92672">&lt;xs:sequence&gt;</span>
+            <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">ref=</span><span style="color:#e6db74">&#34;organizations-registry-base:orgVersionGUID&#34;</span><span style="color:#f92672">/&gt;</span>
+            <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;lastEditingDate&#34;</span> <span style="color:#a6e22e">type=</span><span style="color:#e6db74">&#34;xs:date&#34;</span><span style="color:#f92672">&gt;</span>
+              <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+                <span style="color:#f92672">&lt;xs:documentation&gt;</span>Время последнего изменения<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+              <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+            <span style="color:#f92672">&lt;/xs:element&gt;</span>
+            <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;IsActual&#34;</span> <span style="color:#a6e22e">type=</span><span style="color:#e6db74">&#34;xs:boolean&#34;</span><span style="color:#f92672">&gt;</span>
+              <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+                <span style="color:#f92672">&lt;xs:documentation&gt;</span>Признак актуальности записи<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+              <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+            <span style="color:#f92672">&lt;/xs:element&gt;</span>
+            <span style="color:#f92672">&lt;xs:choice&gt;</span>
+              <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;Legal&#34;</span> <span style="color:#a6e22e">type=</span><span style="color:#e6db74">&#34;organizations-registry-base:LegalType&#34;</span><span style="color:#f92672">&gt;</span>
+                <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+                  <span style="color:#f92672">&lt;xs:documentation&gt;</span>Юридическое лицо<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+                <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+              <span style="color:#f92672">&lt;/xs:element&gt;</span>
+              <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;Subsidiary&#34;</span><span style="color:#f92672">&gt;</span>
+                <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+                  <span style="color:#f92672">&lt;xs:documentation&gt;</span>Обособленное подразделение<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+                <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+                <span style="color:#f92672">&lt;xs:complexType&gt;</span>
+                  <span style="color:#f92672">&lt;xs:complexContent&gt;</span>
+                    <span style="color:#f92672">&lt;xs:extension</span> <span style="color:#a6e22e">base=</span><span style="color:#e6db74">&#34;organizations-registry-base:SubsidiaryType&#34;</span><span style="color:#f92672">&gt;</span>
+                      <span style="color:#f92672">&lt;xs:sequence&gt;</span>
+                        <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;StatusVersion&#34;</span><span style="color:#f92672">&gt;</span>
+                          <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+                            <span style="color:#f92672">&lt;xs:documentation&gt;</span>Статус версии <span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+                          <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+                          <span style="color:#f92672">&lt;xs:simpleType&gt;</span>
+                            <span style="color:#f92672">&lt;xs:restriction</span> <span style="color:#a6e22e">base=</span><span style="color:#e6db74">&#34;xs:string&#34;</span><span style="color:#f92672">/&gt;</span>
+                          <span style="color:#f92672">&lt;/xs:simpleType&gt;</span>
+                        <span style="color:#f92672">&lt;/xs:element&gt;</span>
+                        <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;ParentOrg&#34;</span><span style="color:#f92672">&gt;</span>
+                          <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+                            <span style="color:#f92672">&lt;xs:documentation&gt;</span>Информация о головной организации<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+                          <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+                          <span style="color:#f92672">&lt;xs:complexType&gt;</span>
+                            <span style="color:#f92672">&lt;xs:sequence&gt;</span>
+                              <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">ref=</span><span style="color:#e6db74">&#34;organizations-registry-base:RegOrgVersion&#34;</span><span style="color:#f92672">/&gt;</span>
+                            <span style="color:#f92672">&lt;/xs:sequence&gt;</span>
+                          <span style="color:#f92672">&lt;/xs:complexType&gt;</span>
+                        <span style="color:#f92672">&lt;/xs:element&gt;</span>
+                      <span style="color:#f92672">&lt;/xs:sequence&gt;</span>
+                    <span style="color:#f92672">&lt;/xs:extension&gt;</span>
+                  <span style="color:#f92672">&lt;/xs:complexContent&gt;</span>
+                <span style="color:#f92672">&lt;/xs:complexType&gt;</span>
+              <span style="color:#f92672">&lt;/xs:element&gt;</span>
+              <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;Entrp&#34;</span> <span style="color:#a6e22e">type=</span><span style="color:#e6db74">&#34;organizations-registry-base:EntpsType&#34;</span><span style="color:#f92672">&gt;</span>
+                <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+                  <span style="color:#f92672">&lt;xs:documentation&gt;</span>Индивидуальный предприниматель<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+                <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+              <span style="color:#f92672">&lt;/xs:element&gt;</span>
+              <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;ForeignBranch&#34;</span> <span style="color:#a6e22e">type=</span><span style="color:#e6db74">&#34;organizations-registry-base:ForeignBranchType&#34;</span><span style="color:#f92672">&gt;</span>
+                <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+                  <span style="color:#f92672">&lt;xs:documentation&gt;</span>ФПИЮЛ (Филиал или представительство иностранного юридического лица)<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+                <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+              <span style="color:#f92672">&lt;/xs:element&gt;</span>
+            <span style="color:#f92672">&lt;/xs:choice&gt;</span>
+            <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;registryOrganizationStatus&#34;</span> <span style="color:#a6e22e">minOccurs=</span><span style="color:#e6db74">&#34;0&#34;</span><span style="color:#f92672">&gt;</span>
+              <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+                <span style="color:#f92672">&lt;xs:documentation&gt;</span>Статус:
+(P)UBLISHED - опубликована в одном из документов в рамках раскрытия<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+              <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+              <span style="color:#f92672">&lt;xs:simpleType&gt;</span>
+                <span style="color:#f92672">&lt;xs:restriction</span> <span style="color:#a6e22e">base=</span><span style="color:#e6db74">&#34;xs:string&#34;</span><span style="color:#f92672">&gt;</span>
+                  <span style="color:#f92672">&lt;xs:enumeration</span> <span style="color:#a6e22e">value=</span><span style="color:#e6db74">&#34;P&#34;</span><span style="color:#f92672">/&gt;</span>
+                <span style="color:#f92672">&lt;/xs:restriction&gt;</span>
+              <span style="color:#f92672">&lt;/xs:simpleType&gt;</span>
+            <span style="color:#f92672">&lt;/xs:element&gt;</span>
+          <span style="color:#f92672">&lt;/xs:sequence&gt;</span>
+        <span style="color:#f92672">&lt;/xs:complexType&gt;</span>
+      <span style="color:#f92672">&lt;/xs:element&gt;</span>
+      <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">ref=</span><span style="color:#e6db74">&#34;base:orgPPAGUID&#34;</span> <span style="color:#a6e22e">minOccurs=</span><span style="color:#e6db74">&#34;0&#34;</span><span style="color:#f92672">/&gt;</span>
+      <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;organizationRoles&#34;</span> <span style="color:#a6e22e">type=</span><span style="color:#e6db74">&#34;nsi-base:nsiRef&#34;</span> <span style="color:#a6e22e">minOccurs=</span><span style="color:#e6db74">&#34;0&#34;</span> <span style="color:#a6e22e">maxOccurs=</span><span style="color:#e6db74">&#34;unbounded&#34;</span><span style="color:#f92672">&gt;</span>
+        <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+          <span style="color:#f92672">&lt;xs:documentation&gt;</span>Полномочие организации (НСИ №20)<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+        <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+      <span style="color:#f92672">&lt;/xs:element&gt;</span>
+      <span style="color:#f92672">&lt;xs:element</span> <span style="color:#a6e22e">name=</span><span style="color:#e6db74">&#34;isRegistered&#34;</span> <span style="color:#a6e22e">type=</span><span style="color:#e6db74">&#34;xs:boolean&#34;</span> <span style="color:#a6e22e">fixed=</span><span style="color:#e6db74">&#34;true&#34;</span> <span style="color:#a6e22e">minOccurs=</span><span style="color:#e6db74">&#34;0&#34;</span><span style="color:#f92672">&gt;</span>
+        <span style="color:#f92672">&lt;xs:annotation&gt;</span>
+          <span style="color:#f92672">&lt;xs:documentation&gt;</span>Зарегистрирована в ГИС ЖКХ<span style="color:#f92672">&lt;/xs:documentation&gt;</span>
+        <span style="color:#f92672">&lt;/xs:annotation&gt;</span>
+      <span style="color:#f92672">&lt;/xs:element&gt;</span>
+    <span style="color:#f92672">&lt;/xs:sequence&gt;</span>
+  <span style="color:#f92672">&lt;/xs:complexType&gt;</span>
+...</code></pre></div>
+<p></details></p>
+
+<p>Ну приступим, откроем нужные нам пакеты XDTO. Оказывается, нужные сущности являются не типами, а свойствами, как с этим работать в документации на XDTO в статьях, которые я находил, не описано, поэтому воспользуемся урокам магии:</p>
+
+<ul>
+<li>Создадим объекты из свойств</li>
+<li>Создадим объекты из внутренних типов свойств или тип объектов</li>
+<li>Создадим объекты из Типов значений</li>
+</ul>
+
+<p><img src="https://habrastorage.org/files/67c/639/535/67c639535ea749f5b72eee461fd05a5b.JPG" alt="image"/></p>
+
+<p>Начнем с тела exportOrgRegistryRequest.</p>
+
+<pre><code>&amp;НаСервереБезКонтекста
+Функция ПолучитьДанныеОрганизацияПоОГРН(ОГРН)
+  //Получим нужные пакеты
+  ПакетOrgRegCom = ФабрикаXDTO.Пакеты.Получить(&quot;http://dom.gosuslugi.ru/schema/integration/organizations-registry-common/&quot;);
+  ПакетOrgBase = ФабрикаXDTO.Пакеты.Получить(&quot;http://dom.gosuslugi.ru/schema/integration/organizations-base/&quot;);
+
+  //Магия:выйдем на нужный тип через свойство, этот метод нам очень часто пригодится:
+  СвойствоXDTO = ПакетOrgRegCom.КорневыеСвойства.Получить(&quot;exportOrgRegistryRequest&quot;);
+  //Создадим сам объект для тела запроса
+  ОбъектXDTO = ФабрикаXDTO.Создать(СвойствоXDTO.Тип);
+  //признак что это элемент надо подписать сертификатом
+  ОбъектXDTO.Id = &quot;signed-data-container&quot;;
+  //требования стандарта, импорт XDTO не обрабатывает аттрибут fixed 
+  ОбъектXDTO.version = &quot;10.0.2.1&quot;;
+
+  //критерий поиска
+  //Магия:опять выйдем на строенный тип, через свойства объекта
+  SearchCriteriaЗапись = ФабрикаXDTO.Создать(ОбъектXDTO.SearchCriteria.ВладеющееСвойство.Тип);
+    
+  //огрн надо ставить через типизированное значение
+  OGRN = ФабрикаXDTO.Создать(ПакетOrgBase.КорневыеСвойства.Получить(&quot;OGRN&quot;).Тип, Строка(ОГРН));
+  SearchCriteriaЗапись.OGRN = OGRN;
+  ОбъектXDTO.SearchCriteria.Добавить(SearchCriteriaЗапись);
+    
+  //сохраним тело
+  Запрос = Новый Структура(&quot;ОбъектXDTO,СвойствоXDTO,Имя&quot;, ОбъектXDTO, СвойствоXDTO);
+  //сохраним тип ответа, нам по надобиться для десериализаций ответа
+  ОтветСвойствоXDTOResult = ПакетOrgRegCom.КорневыеСвойства.Получить(&quot;exportOrgRegistryResult&quot;);
+    
+  Возврат СформироватьXMLЗапрос(Новый УникальныйИдентификатор, Запрос, ОтветСвойствоXDTOResult );
+КонецФункции
+</code></pre>
+
+<p>Напишем функцию для сбора XML-запроса:</p>
+
+<pre><code>&amp;НаСервереБезКонтекста
+Функция СформироватьXMLЗапрос(GuidЗаголовка, ОтправкаXDTO, ОтветXDTO)
+  ПакетBase = ФабрикаXDTO.Пакеты.Получить(&quot;http://dom.gosuslugi.ru/schema/integration/base/&quot;);
+  ПространствоИменSOAP = &quot;http://schemas.xmlsoap.org/soap/envelope/&quot;;
+  //XML файл    
+  ЗаписьXML = Новый ЗаписьXML;
+  ПараметрыЗаписиXML = Новый ПараметрыЗаписиXML(&quot;UTF-8&quot;);
+  ЗаписьXML.УстановитьСтроку(ПараметрыЗаписиXML);
+  ЗаписьXML.ЗаписатьОбъявлениеXML();
+    ЗаписьXML.ЗаписатьНачалоЭлемента(&quot;Envelope&quot;, ПространствоИменSOAP);
+    ЗаписьXML.ЗаписатьСоответствиеПространстваИмен(&quot;soap&quot;, ПространствоИменSOAP);
+    ЗаписьXML.ЗаписатьСоответствиеПространстваИмен(&quot;xsi&quot;, &quot;http://www.w3.org/2001/XMLSchema-instance&quot;);
+    ЗаписьXML.ЗаписатьСоответствиеПространстваИмен(&quot;xs&quot;, &quot;http://www.w3.org/2001/XMLSchema&quot;);
+        
+    ЗаписьXML.ЗаписатьСоответствиеПространстваИмен(&quot;base&quot;, &quot;http://dom.gosuslugi.ru/schema/integration/base/&quot;);
+    ЗаписьXML.ЗаписатьСоответствиеПространстваИмен(&quot;organizations-registry-base&quot;, &quot;http://dom.gosuslugi.ru/schema/integration/organizations-registry-base/&quot;); 
+    ЗаписьXML.ЗаписатьСоответствиеПространстваИмен(&quot;ns&quot;, &quot;http://www.w3.org/2000/09/xmldsig#&quot;);
+    ЗаписьXML.ЗаписатьСоответствиеПространстваИмен(&quot;ro&quot;, &quot;http://dom.gosuslugi.ru/schema/integration/organizations-registry-common/&quot;);
+        
+     //Заголовок ISRequestHeader
+    ЗаписьXML.ЗаписатьНачалоЭлемента(&quot;Header&quot;, ПространствоИменSOAP);
+      //снова метод через свойства
+      ЗаголовокСвойствоXDTO = ПакетBase.КорневыеСвойства.Получить(&quot;ISRequestHeader&quot;);
+      ЗаголовокЗапроса = ФабрикаXDTO.Создать(ЗаголовокСвойствоXDTO.Тип);
+      ЗаголовокЗапроса.Date = ТекущаяДата();
+      ЗаголовокЗапроса.MessageGUID = ФабрикаXDTO.Создать(ФабрикаXDTO.Тип(&quot;http://dom.gosuslugi.ru/schema/integration/base/&quot;, &quot;GUIDType&quot;), Строка(GuidЗаголовка));
+      ФабрикаXDTO.ЗаписатьXML(ЗаписьXML, ЗаголовокЗапроса, ЗаголовокСвойствоXDTO.ЛокальноеИмя);
+    ЗаписьXML.ЗаписатьКонецЭлемента();  
+    //Тело у нас будет подготовленый exportOrgRegistryRequest
+    ЗаписьXML.ЗаписатьНачалоЭлемента(&quot;Body&quot;, ПространствоИменSOAP);
+      ФабрикаXDTO.ЗаписатьXML(ЗаписьXML, ОтправкаXDTO.ОбъектXDTO, ОтправкаXDTO.СвойствоXDTO.ЛокальноеИмя, ОтправкаXDTO.СвойствоXDTO.URIПространстваИмен);
+      ЗаписьXML.ЗаписатьКонецЭлемента();
+  ЗаписьXML.ЗаписатьКонецЭлемента();
+  //отдаем результат для отправки
+  XMLЗапрос = Новый Структура();
+  XMLЗапрос.Вставить(&quot;XMLTекст&quot;, ЗаписьXML.Закрыть());
+  XMLЗапрос.Вставить(&quot;ОтветXDTO&quot;, ОтветXDTO);
+  Возврат XMLЗапрос;
+КонецФункции
+</code></pre>
+
+<p>В итоге получим запрос:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#75715e">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+<span style="color:#f92672">&lt;soap:Envelope</span> <span style="color:#a6e22e">xmlns:base=</span><span style="color:#e6db74">&#34;http://dom.gosuslugi.ru/schema/integration/base/&#34;</span> <span style="color:#a6e22e">xmlns:hm=</span><span style="color:#e6db74">&#34;http://dom.gosuslugi.ru/schema/integration/house-management/&#34;</span> <span style="color:#a6e22e">xmlns:ns=</span><span style="color:#e6db74">&#34;http://www.w3.org/2000/09/xmldsig#&#34;</span> <span style="color:#a6e22e">xmlns:nsi-base=</span><span style="color:#e6db74">&#34;http://dom.gosuslugi.ru/schema/integration/nsi-base/&#34;</span> <span style="color:#a6e22e">xmlns:nsi-common=</span><span style="color:#e6db74">&#34;http://dom.gosuslugi.ru/schema/integration/nsi-common/&#34;</span> <span style="color:#a6e22e">xmlns:organizations-registry-base=</span><span style="color:#e6db74">&#34;http://dom.gosuslugi.ru/schema/integration/organizations-registry-base/&#34;</span> <span style="color:#a6e22e">xmlns:ro=</span><span style="color:#e6db74">&#34;http://dom.gosuslugi.ru/schema/integration/organizations-registry-common/&#34;</span> <span style="color:#a6e22e">xmlns:soap=</span><span style="color:#e6db74">&#34;http://schemas.xmlsoap.org/soap/envelope/&#34;</span> <span style="color:#a6e22e">xmlns:soapenc=</span><span style="color:#e6db74">&#34;http://schemas.xmlsoap.org/soap/encoding/&#34;</span> <span style="color:#a6e22e">xmlns:tns=</span><span style="color:#e6db74">&#34;http://dom.gosuslugi.ru/schema/integration/house-management-service/&#34;</span> <span style="color:#a6e22e">xmlns:xs=</span><span style="color:#e6db74">&#34;http://www.w3.org/2001/XMLSchema&#34;</span> <span style="color:#a6e22e">xmlns:xsi=</span><span style="color:#e6db74">&#34;http://www.w3.org/2001/XMLSchema-instance&#34;</span><span style="color:#f92672">&gt;</span>
+  <span style="color:#f92672">&lt;soap:Header&gt;</span>
+    <span style="color:#f92672">&lt;base:ISRequestHeader&gt;</span>
+      <span style="color:#f92672">&lt;base:Date&gt;</span>2016-10-29T20:06:35<span style="color:#f92672">&lt;/base:Date&gt;</span>
+      <span style="color:#f92672">&lt;base:MessageGUID&gt;</span>8120c453-d4ee-4918-84f8-276257bb2c84<span style="color:#f92672">&lt;/base:MessageGUID&gt;</span>
+      <span style="color:#f92672">&lt;/base:ISRequestHeader&gt;</span>
+  <span style="color:#f92672">&lt;/soap:Header&gt;</span>
+  <span style="color:#f92672">&lt;soap:Body&gt;</span>
+    <span style="color:#f92672">&lt;ro:exportOrgRegistryRequest</span> <span style="color:#a6e22e">Id=</span><span style="color:#e6db74">&#34;signed-data-container&#34;</span> <span style="color:#a6e22e">base:version=</span><span style="color:#e6db74">&#34;10.0.2.1&#34;</span><span style="color:#f92672">&gt;</span>
+      <span style="color:#75715e">&lt;!--в боевых запросах тут большой кусок подписи запроса, куски сертификатов и прочие--&gt;</span>
+      <span style="color:#f92672">&lt;ro:SearchCriteria&gt;</span>
+        <span style="color:#f92672">&lt;OGRN</span> <span style="color:#a6e22e">xmlns=</span><span style="color:#e6db74">&#34;http://dom.gosuslugi.ru/schema/integration/organizations-base/&#34;</span><span style="color:#f92672">&gt;</span>1027700132195<span style="color:#f92672">&lt;/OGRN&gt;</span>
+      <span style="color:#f92672">&lt;/ro:SearchCriteria&gt;</span>
+    <span style="color:#f92672">&lt;/ro:exportOrgRegistryRequest&gt;</span>
+  <span style="color:#f92672">&lt;/soap:Body&gt;</span>
+<span style="color:#f92672">&lt;/soap:Envelope&gt;</span>
+<span style="color:#f92672">&lt;/source&gt;</span></code></pre></div>
+<p>Отправим запрос:</p>
+
+<pre><code>&amp;НаСервере
+Процедура ТестоваяОтправкаНаСервере()
+  //Узнаем данные по Сбербанку
+  XMLЗапрос = ПолучитьДанныеОрганизацияПоОГРН(&quot;1027700132195&quot;);
+  //Это тема для другой статья
+  //тут мы подписываем пакет данных
+  //и отправляем Post запрос на сервис 
+  XMLОтвет = ОтправкаXMLЗапроса(XMLЗапрос);
+  Если XMLОтвет.КодОтвета &lt; 299 Тогда
+    //запрос успешен
+    ОбъектXDTO = ДесериализацияОтвета(XMLОтвет.ИмяФайлРезультата, XMLЗапрос.ОтветXDTO)
+  КонецЕсли; 
+КонецПроцедуры
+</code></pre>
+
+<p>Ответ от серверов ГИС ЖКХ (СИТ-1):</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-xml" data-lang="xml"><span style="color:#75715e">&lt;?xml version=&#34;1.0&#34; encoding=&#34;UTF-8&#34;?&gt;</span>
+<span style="color:#f92672">&lt;soap:Envelope</span> <span style="color:#a6e22e">xmlns:ns10=</span><span style="color:#e6db74">&#34;http://dom.gosuslugi.ru/schema/integration/organizations-base/&#34;</span> <span style="color:#a6e22e">xmlns:ns11=</span><span style="color:#e6db74">&#34;http://dom.gosuslugi.ru/schema/integration/payments-base/&#34;</span> <span style="color:#a6e22e">xmlns:ns12=</span><span style="color:#e6db74">&#34;http://dom.gosuslugi.ru/schema/integration/bills-base/&#34;</span> <span style="color:#a6e22e">xmlns:ns13=</span><span style="color:#e6db74">&#34;http://dom.gosuslugi.ru/schema/integration/organizations-registry-common/&#34;</span> <span style="color:#a6e22e">xmlns:ns3=</span><span style="color:#e6db74">&#34;http://www.w3.org/2000/09/xmldsig#&#34;</span> <span style="color:#a6e22e">xmlns:ns4=</span><span style="color:#e6db74">&#34;http://dom.gosuslugi.ru/schema/integration/base/&#34;</span> <span style="color:#a6e22e">xmlns:ns5=</span><span style="color:#e6db74">&#34;http://dom.gosuslugi.ru/schema/integration/account-base/&#34;</span> <span style="color:#a6e22e">xmlns:ns6=</span><span style="color:#e6db74">&#34;http://dom.gosuslugi.ru/schema/integration/nsi-base/&#34;</span> <span style="color:#a6e22e">xmlns:ns7=</span><span style="color:#e6db74">&#34;http://dom.gosuslugi.ru/schema/integration/individual-registry-base/&#34;</span> <span style="color:#a6e22e">xmlns:ns8=</span><span style="color:#e6db74">&#34;http://dom.gosuslugi.ru/schema/integration/metering-device-base/&#34;</span> <span style="color:#a6e22e">xmlns:ns9=</span><span style="color:#e6db74">&#34;http://dom.gosuslugi.ru/schema/integration/organizations-registry-base/&#34;</span> <span style="color:#a6e22e">xmlns:soap=</span><span style="color:#e6db74">&#34;http://schemas.xmlsoap.org/soap/envelope/&#34;</span><span style="color:#f92672">&gt;</span>
+  <span style="color:#f92672">&lt;soap:Header&gt;</span>
+    <span style="color:#f92672">&lt;ns4:ResultHeader&gt;</span>
+    <span style="color:#f92672">&lt;ns4:Date&gt;</span>2016-10-29T20:06:37.185+03:00<span style="color:#f92672">&lt;/ns4:Date&gt;</span>
+      <span style="color:#f92672">&lt;ns4:MessageGUID&gt;</span>8120c453-d4ee-4918-84f8-276257bb2c84<span style="color:#f92672">&lt;/ns4:MessageGUID&gt;</span>
+    <span style="color:#f92672">&lt;/ns4:ResultHeader&gt;</span>
+    <span style="color:#f92672">&lt;/soap:Header&gt;</span>
+    <span style="color:#f92672">&lt;soap:Body&gt;</span>
+        <span style="color:#f92672">&lt;ns13:exportOrgRegistryResult</span> <span style="color:#a6e22e">Id=</span><span style="color:#e6db74">&#34;signed-data-container&#34;</span> <span style="color:#a6e22e">ns4:version=</span><span style="color:#e6db74">&#34;10.0.2.1&#34;</span><span style="color:#f92672">&gt;</span>
+            <span style="color:#75715e">&lt;!--опистул кусок подписи пакета он не особо интересен--&gt;</span>
+            <span style="color:#f92672">&lt;ns13:OrgData&gt;</span>
+                <span style="color:#f92672">&lt;ns9:orgRootEntityGUID&gt;</span>50a8619b-2d27-4f20-8233-eab1ccf9dffe<span style="color:#f92672">&lt;/ns9:orgRootEntityGUID&gt;</span>
+                <span style="color:#f92672">&lt;ns13:OrgVersion&gt;</span>
+                    <span style="color:#f92672">&lt;ns9:orgVersionGUID&gt;</span>50a8619b-2d27-4f20-8233-eab1ccf9dffe<span style="color:#f92672">&lt;/ns9:orgVersionGUID&gt;</span>
+                    <span style="color:#f92672">&lt;ns13:lastEditingDate&gt;</span>2015-08-10+03:00<span style="color:#f92672">&lt;/ns13:lastEditingDate&gt;</span>
+                    <span style="color:#f92672">&lt;ns13:IsActual&gt;</span>true<span style="color:#f92672">&lt;/ns13:IsActual&gt;</span>
+                    <span style="color:#f92672">&lt;ns13:Legal&gt;</span>
+                        <span style="color:#f92672">&lt;ns9:ShortName&gt;</span>ОАО «Сбербанк России»<span style="color:#f92672">&lt;/ns9:ShortName&gt;</span>
+                        <span style="color:#f92672">&lt;ns9:FullName&gt;</span>ОАО «Сбербанк России»<span style="color:#f92672">&lt;/ns9:FullName&gt;</span>
+                        <span style="color:#f92672">&lt;ns10:OGRN&gt;</span>1027700132195<span style="color:#f92672">&lt;/ns10:OGRN&gt;</span>
+                        <span style="color:#f92672">&lt;ns9:StateRegistrationDate&gt;</span>2015-08-10+03:00<span style="color:#f92672">&lt;/ns9:StateRegistrationDate&gt;</span>
+                        <span style="color:#f92672">&lt;ns10:INN&gt;</span>7707083893<span style="color:#f92672">&lt;/ns10:INN&gt;</span>
+                        <span style="color:#f92672">&lt;ns10:KPP&gt;</span>775001001<span style="color:#f92672">&lt;/ns10:KPP&gt;</span>
+                        <span style="color:#f92672">&lt;ns10:OKOPF&gt;</span>12247<span style="color:#f92672">&lt;/ns10:OKOPF&gt;</span>
+                        <span style="color:#f92672">&lt;ns9:Address&gt;</span>г. Москва, ул. Вавилова, д. 19<span style="color:#f92672">&lt;/ns9:Address&gt;</span>
+                        <span style="color:#f92672">&lt;ns9:FIASHouseGuid&gt;</span>93409d8c-d8d4-4491-838f-f9aa1678b5e6<span style="color:#f92672">&lt;/ns9:FIASHouseGuid&gt;</span>
+                    <span style="color:#f92672">&lt;/ns13:Legal&gt;</span>
+                    <span style="color:#f92672">&lt;ns13:registryOrganizationStatus&gt;</span>P<span style="color:#f92672">&lt;/ns13:registryOrganizationStatus&gt;</span>
+                <span style="color:#f92672">&lt;/ns13:OrgVersion&gt;</span>
+                <span style="color:#f92672">&lt;ns4:orgPPAGUID&gt;</span>2c57ed5e-583a-4471-839e-776250bdde50<span style="color:#f92672">&lt;/ns4:orgPPAGUID&gt;</span>
+                <span style="color:#f92672">&lt;ns13:organizationRoles&gt;</span>
+                    <span style="color:#f92672">&lt;ns6:Code&gt;</span>1<span style="color:#f92672">&lt;/ns6:Code&gt;</span>
+                    <span style="color:#f92672">&lt;ns6:GUID&gt;</span>9875cc2e-73f9-41d6-bceb-47b48ed23395<span style="color:#f92672">&lt;/ns6:GUID&gt;</span>
+                    <span style="color:#f92672">&lt;ns6:Name&gt;</span>Управляющая организация<span style="color:#f92672">&lt;/ns6:Name&gt;</span>
+                <span style="color:#f92672">&lt;/ns13:organizationRoles&gt;</span>
+                <span style="color:#f92672">&lt;ns13:isRegistered&gt;</span>true<span style="color:#f92672">&lt;/ns13:isRegistered&gt;</span>
+            <span style="color:#f92672">&lt;/ns13:OrgData&gt;</span>
+        <span style="color:#f92672">&lt;/ns13:exportOrgRegistryResult&gt;</span>
+    <span style="color:#f92672">&lt;/soap:Body&gt;</span>
+<span style="color:#f92672">&lt;/soap:Envelope&gt;</span></code></pre></div>
+<p>Как мы видим, ответ напрямую десериализовать не получится, потому что нет такого типа в предложенных xsd схемах. Нам надо как-то пропустить часть тэгов и обработать только область ответа. На эту тему я тоже не нашел информации, но методом проб и ошибок приходим к кусочку магий:</p>
+
+<pre><code>&amp;НаСервереБезКонтекста
+Функция ДесериализацияОтвета(ПутьКФайлу, ОтветXDTO)
+  //Откроем файл
+  Чтение = новый ЧтениеXML;
+  Чтение.ОткрытьФайл(ПутьКФайлу, , , &quot;UTF-8&quot;); 
+  //Начинаем пропускать все служебное заголовки, тело ищем наш тэг ответа
+  Пока Чтение.Прочитать() Цикл
+    Если Чтение.ЛокальноеИмя = ОтветXDTO.СвойствоXDTO.Имя Тогда
+      //т.к. вы спозиционировались на нужном место можно десериализовать данные. Магия
+      ОбъектXDTO = ФабрикаXDTO.ПрочитатьXML(Чтение, ОтветXDTO.СвойствоXDTO.Тип); 
+      КонецЕсли; 
+  КонецЦикла;
+  Возврат ОбъектXDTO;
+КонецФункции
+</code></pre>
+
+<p>В итоге работать можно с очень сложными xsd схемами через стандартные инструменты платформы. В целом 1С контролируют типизацию и заполнения, бывает чересчур излишне, особенно когда внутри свойства пакета используется базовый тип другого пакета, но в любом случае тип нужно привести к локальному из-за другого пространства URI. Удобно работать с десериализоваными данными, так как там всю работу на себя берет платформа. Но проверки происходят на этапе выполнения, а при написания кода платформа 1С не предоставляет никаких подсказок и проходится пользоваться сторонними утилитами, и даже при выполнении большая часть элементов находится в состоянии &ldquo;Неопределено&rdquo; и даже тип или его свойство можно увидеть только в спецификации.</p>
+
+<p><a href="https://habrahabr.ru/post/313910/">habrahabr.ru</a></p>
+
+</article>
+
+
+<section class="post-nav">
+    <ul>
+        
+        
+        <li>
+            <a href="http://p.karasov.net/post/1s-olympiad-problems/">Эксперименты над олимпиадной задачей <i class="fa fa-chevron-circle-right"></i> </a>
+        </li>
+        
+    </ul>
+</section>
+    
+        <section class="comments-block">
+      <button id="show-comments" style="display: none;"><i class="fa fa-comments-o"></i> Add/View Comments</button>
+</section>
+
+<section id="disqus_thread"></section>
+
+<script>
+      (function () {
+            
+            
+            if (window.location.hostname == "localhost")
+                  return;
+
+            var disqus_loaded = false;
+            var disqus_shortname = 'pavelkarasov';
+            var disqus_button = document.getElementById("show-comments");
+
+            disqus_button.style.display = "";
+            disqus_button.addEventListener("click", disqus, false);
+
+            function disqus() {
+
+                  if (!disqus_loaded) {
+                        disqus_loaded = true;
+
+                        var e = document.createElement("script");
+                        e.type = "text/javascript";
+                        e.async = true;
+                        e.src = "//" + disqus_shortname + ".disqus.com/embed.js";
+                        (document.getElementsByTagName("head")[0] ||
+                              document.getElementsByTagName("body")[0])
+                        .appendChild(e);
+
+                        
+                        document.getElementById("show-comments").style.display = "none";
+                  }
+            }
+
+            
+            var hash = window.location.hash.substr(1);
+            if (hash.length > 8) {
+                  if (hash.substring(0, 8) == "comment-") {
+                        disqus();
+                  }
+            }
+
+            
+            if (/bot|google|baidu|bing|msn|duckduckgo|slurp|yandex/i.test(navigator.userAgent)) {
+                  disqus();
+            }
+      })();
+</script>
+    
+
+
+
+
+
+</main>
+    <footer>
+        <h6>Copyright &copy; 2018 - Карасов Павел | 
+            Rendered by <a href="https://gohugo.io" title="Hugo">Hugo</a> |
+            <a href="http://p.karasov.net/index.xml">Subscribe</a></h6>
+    </footer>
+</div>
+<script src="http://p.karasov.net/js/scripts.js"></script>
+</body>
+
+</html>

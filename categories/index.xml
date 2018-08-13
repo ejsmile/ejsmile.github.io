@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Categories on Павел Карасов</title>
+    <link>http://p.karasov.net/categories/</link>
+    <description>Recent content in Categories on Павел Карасов</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>ru-ru</language>
+    <copyright>Copyright &amp;copy; 2018 - Карасов Павел</copyright>
+    
+	<atom:link href="http://p.karasov.net/categories/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+  </channel>
+</rss>
