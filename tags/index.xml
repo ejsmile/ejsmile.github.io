@@ -2,76 +2,76 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on Павел Карасов</title>
-    <link>http://p.karasov.net/tags/</link>
+    <link>https://p.karasov.net/tags.html</link>
     <description>Recent content in Tags on Павел Карасов</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>ru-ru</language>
     <copyright>Copyright &amp;copy; 2018 - Карасов Павел</copyright>
     <lastBuildDate>Mon, 13 Feb 2017 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="http://p.karasov.net/tags/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://p.karasov.net/tags/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>1c</title>
-      <link>http://p.karasov.net/tags/1c/</link>
+      <link>https://p.karasov.net/tags/1c.html</link>
       <pubDate>Mon, 13 Feb 2017 00:00:00 +0000</pubDate>
       
-      <guid>http://p.karasov.net/tags/1c/</guid>
+      <guid>https://p.karasov.net/tags/1c.html</guid>
       <description></description>
     </item>
     
     <item>
       <title>Development</title>
-      <link>http://p.karasov.net/tags/development/</link>
+      <link>https://p.karasov.net/tags/development.html</link>
       <pubDate>Wed, 03 May 2017 00:00:00 +0000</pubDate>
       
-      <guid>http://p.karasov.net/tags/development/</guid>
+      <guid>https://p.karasov.net/tags/development.html</guid>
       <description></description>
     </item>
     
     <item>
       <title>Ms Sql</title>
-      <link>http://p.karasov.net/tags/ms-sql/</link>
+      <link>https://p.karasov.net/tags/ms-sql.html</link>
       <pubDate>Wed, 03 May 2017 00:00:00 +0000</pubDate>
       
-      <guid>http://p.karasov.net/tags/ms-sql/</guid>
+      <guid>https://p.karasov.net/tags/ms-sql.html</guid>
       <description></description>
     </item>
     
     <item>
       <title>Ms Sql Server</title>
-      <link>http://p.karasov.net/tags/ms-sql-server/</link>
+      <link>https://p.karasov.net/tags/ms-sql-server.html</link>
       <pubDate>Wed, 03 May 2017 00:00:00 +0000</pubDate>
       
-      <guid>http://p.karasov.net/tags/ms-sql-server/</guid>
+      <guid>https://p.karasov.net/tags/ms-sql-server.html</guid>
       <description></description>
     </item>
     
     <item>
       <title>Sql</title>
-      <link>http://p.karasov.net/tags/sql/</link>
+      <link>https://p.karasov.net/tags/sql.html</link>
       <pubDate>Wed, 03 May 2017 00:00:00 +0000</pubDate>
       
-      <guid>http://p.karasov.net/tags/sql/</guid>
+      <guid>https://p.karasov.net/tags/sql.html</guid>
       <description></description>
     </item>
     
     <item>
       <title>Xdto</title>
-      <link>http://p.karasov.net/tags/xdto/</link>
+      <link>https://p.karasov.net/tags/xdto.html</link>
       <pubDate>Mon, 13 Feb 2017 00:00:00 +0000</pubDate>
       
-      <guid>http://p.karasov.net/tags/xdto/</guid>
+      <guid>https://p.karasov.net/tags/xdto.html</guid>
       <description></description>
     </item>
     
     <item>
       <title>Xml</title>
-      <link>http://p.karasov.net/tags/xml/</link>
+      <link>https://p.karasov.net/tags/xml.html</link>
       <pubDate>Mon, 13 Feb 2017 00:00:00 +0000</pubDate>
       
-      <guid>http://p.karasov.net/tags/xml/</guid>
+      <guid>https://p.karasov.net/tags/xml.html</guid>
       <description></description>
     </item>
     

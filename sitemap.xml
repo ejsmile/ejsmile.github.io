@@ -3,76 +3,76 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>http://p.karasov.net/post/1s-olympiad-problems/</loc>
+    <loc>https://p.karasov.net/post/1s-olympiad-problems.html</loc>
     <lastmod>2017-05-03T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>http://p.karasov.net/post/1s-xdto-gis--zkh/</loc>
+    <loc>https://p.karasov.net/post/1s-xdto-gis--zkh.html</loc>
     <lastmod>2017-02-13T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>http://p.karasov.net/tags/1c/</loc>
-    <lastmod>2017-02-13T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://p.karasov.net/categories/</loc>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://p.karasov.net/tags/development/</loc>
-    <lastmod>2017-05-03T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://p.karasov.net/tags/ms-sql/</loc>
-    <lastmod>2017-05-03T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://p.karasov.net/tags/ms-sql-server/</loc>
-    <lastmod>2017-05-03T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://p.karasov.net/post/</loc>
-    <lastmod>2017-05-03T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://p.karasov.net/tags/sql/</loc>
-    <lastmod>2017-05-03T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>http://p.karasov.net/tags/</loc>
+    <loc>https://p.karasov.net/tags/1c.html</loc>
     <lastmod>2017-02-13T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://p.karasov.net/tags/xdto/</loc>
+    <loc>https://p.karasov.net/categories.html</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://p.karasov.net/tags/development.html</loc>
+    <lastmod>2017-05-03T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://p.karasov.net/tags/ms-sql.html</loc>
+    <lastmod>2017-05-03T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://p.karasov.net/tags/ms-sql-server.html</loc>
+    <lastmod>2017-05-03T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://p.karasov.net/post.html</loc>
+    <lastmod>2017-05-03T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://p.karasov.net/tags/sql.html</loc>
+    <lastmod>2017-05-03T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://p.karasov.net/tags.html</loc>
     <lastmod>2017-02-13T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://p.karasov.net/tags/xml/</loc>
+    <loc>https://p.karasov.net/tags/xdto.html</loc>
     <lastmod>2017-02-13T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>http://p.karasov.net/</loc>
+    <loc>https://p.karasov.net/tags/xml.html</loc>
+    <lastmod>2017-02-13T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>https://p.karasov.net/</loc>
     <lastmod>2017-05-03T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
