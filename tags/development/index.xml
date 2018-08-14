@@ -14,10 +14,10 @@
     
     <item>
       <title>Эксперименты над олимпиадной задачей</title>
-      <link>https://p.karasov.net/post/1s-olympiad-problems.html</link>
+      <link>https://p.karasov.net/posts/1s-olympiad-problems.html</link>
       <pubDate>Wed, 03 May 2017 00:00:00 +0000</pubDate>
       
-      <guid>https://p.karasov.net/post/1s-olympiad-problems.html</guid>
+      <guid>https://p.karasov.net/posts/1s-olympiad-problems.html</guid>
       <description>&lt;p&gt;Так получилось, что я попал в магистратуру, и как то гуляя мимо кафедры на глаза попалась олимпиадная задача по 1С. Кратко задача звучит так: &amp;ldquo;Есть записи продажи за каждый день, необходимо найти наибольший период когда план выполнялся&amp;rdquo;. А потом когда я гулял со спящей дочкой у меня встав вопрос, а сколькими способами это можно сделать на SQL. Решения будут на основе MS SQL.&lt;/p&gt;
 
 &lt;p&gt;&lt;/p&gt;</description>

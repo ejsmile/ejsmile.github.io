@@ -3,12 +3,22 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>https://p.karasov.net/post/1s-olympiad-problems.html</loc>
+    <loc>https://p.karasov.net/posts.html</loc>
     <lastmod>2017-05-03T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>https://p.karasov.net/post/1s-xdto-gis--zkh.html</loc>
+    <loc>https://p.karasov.net/about.html</loc>
+    <lastmod>2017-12-10T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://p.karasov.net/posts/1s-olympiad-problems.html</loc>
+    <lastmod>2017-05-03T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://p.karasov.net/posts/1s-xdto-gis--zkh.html</loc>
     <lastmod>2017-02-13T00:00:00+00:00</lastmod>
   </url>
   
@@ -42,12 +52,6 @@
   </url>
   
   <url>
-    <loc>https://p.karasov.net/post.html</loc>
-    <lastmod>2017-05-03T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
     <loc>https://p.karasov.net/tags/sql.html</loc>
     <lastmod>2017-05-03T00:00:00+00:00</lastmod>
     <priority>0</priority>
@@ -73,7 +77,7 @@
   
   <url>
     <loc>https://p.karasov.net/</loc>
-    <lastmod>2017-05-03T00:00:00+00:00</lastmod>
+    <lastmod>2017-12-10T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
