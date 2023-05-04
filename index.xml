@@ -1,50 +1,7 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Павел Карасов</title>
-    <link>https://p.karasov.net/</link>
-    <description>Recent content on Павел Карасов</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>ru-ru</language>
-    <copyright>Copyright &amp;copy; 2018 - Карасов Павел</copyright>
-    <lastBuildDate>Sun, 10 Dec 2017 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="https://p.karasov.net/index.xml" rel="self" type="application/rss+xml" />
-    
-    
-    <item>
-      <title>Обо мне</title>
-      <link>https://p.karasov.net/about.html</link>
-      <pubDate>Sun, 10 Dec 2017 00:00:00 +0000</pubDate>
-      
-      <guid>https://p.karasov.net/about.html</guid>
-      <description>Павел Карасов  Senior developer С# Team lead MS SQL developer  иногда 1С  (стыдно)  Отец 3 дочек Увлекаюсь бегом Endomodo.com
-Для связи
- vk.com/pakarasov
- github.</description>
-    </item>
-    
-    <item>
-      <title>Эксперименты над олимпиадной задачей</title>
-      <link>https://p.karasov.net/posts/1s-olympiad-problems.html</link>
-      <pubDate>Wed, 03 May 2017 00:00:00 +0000</pubDate>
-      
-      <guid>https://p.karasov.net/posts/1s-olympiad-problems.html</guid>
-      <description>&lt;p&gt;Так получилось, что я попал в магистратуру, и как то гуляя мимо кафедры на глаза попалась олимпиадная задача по 1С. Кратко задача звучит так: &amp;ldquo;Есть записи продажи за каждый день, необходимо найти наибольший период когда план выполнялся&amp;rdquo;. А потом когда я гулял со спящей дочкой у меня встав вопрос, а сколькими способами это можно сделать на SQL. Решения будут на основе MS SQL.&lt;/p&gt;
-
-&lt;p&gt;&lt;/p&gt;</description>
-    </item>
-    
-    <item>
-      <title>1С магия XDTO-пакетов на примере интеграций с ГИС ЖКХ</title>
-      <link>https://p.karasov.net/posts/1s-xdto-gis--zkh.html</link>
-      <pubDate>Mon, 13 Feb 2017 00:00:00 +0000</pubDate>
-      
-      <guid>https://p.karasov.net/posts/1s-xdto-gis--zkh.html</guid>
-      <description>&lt;p&gt;Есть очень много статей о том, как работать с XSL/XSD из 1С, но все они в стиле: возьмем нашу XSD схему (простую и удбоную) или наш web-сервис и смотрите, как все легко экспортировать или импортировать. А что делать, если нам дали пачку XSD-схем со сложным взаимосвязями и изменять мы них не можем, а работать и поддерживать актуальность схем надо?&lt;/p&gt;
-
-&lt;p&gt;&lt;/p&gt;</description>
-    </item>
-    
-  </channel>
-</rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Pavel Karasov</title><link>http://example.org/</link><description>Recent content on Pavel Karasov</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><copyright>by Pavel Karasov</copyright><lastBuildDate>Thu, 05 Mar 2020 00:00:00 +0000</lastBuildDate><atom:link href="http://example.org/index.xml" rel="self" type="application/rss+xml"/><item><title>About</title><link>http://example.org/about/</link><pubDate>Sun, 01 Jan 2023 00:00:00 +0000</pubDate><guid>http://example.org/about/</guid><description>BackEnd Developer with 10 years of experience in .NET. I have worked with SOLID, Pattern of GoF, high level cloud design patterns. I work in a company that provides services of automatisation distribution FMCG.
+I understand the problems of horizontal system scaling, problems of multi clients and multi thread access to databases.
+I helped to evolve devops in SysTech, my goal is “no manual operation in the production stage”. For this purpose I have built a delivery pipeline of all our services to the product stage (from legacy system to modern rest api).</description></item><item><title>The best purchase for remote work</title><link>http://example.org/posts/post2-whiteboard/</link><pubDate>Thu, 05 Mar 2020 00:00:00 +0000</pubDate><guid>http://example.org/posts/post2-whiteboard/</guid><description>I am more of a visual person. It is easier for me to work with visual images and convey information through them, to explain and teach.
+At first, COVID-19 created just physical barriers. When we transitioned to remote work, we lost access to short communication where we could approach a colleague and draw something on a board or a piece of paper/napkin. To quickly convey an idea, especially when we see the other person&amp;rsquo;s confusion in their eyes.</description></item><item><title>Лучшая покупка для удаленной работы</title><link>http://example.org/posts/post2-whiteboard.ru/</link><pubDate>Thu, 05 Mar 2020 00:00:00 +0000</pubDate><guid>http://example.org/posts/post2-whiteboard.ru/</guid><description>Я больше визуалист. Для меня проще работать с визуальными образами и передавать информацию через них, объяснять, учить.
+Сначала COVID-19 стали ощущаться просто физические барьеры. При переходе на удаленную работу мы потеряли доступ к короткой коммуникации, когда можно подойти к соседу и нарисовать что-то на доске или на куске бумаги/салфетки. Быстро передать мысль, особенно когда видишь в глазах собеседника непонимание. На созвоне с коллегами мы машем руками, но никто этого не видит.</description></item><item><title>Experiments on an Olympiad problem</title><link>http://example.org/posts/post1-1c-task/</link><pubDate>Wed, 03 May 2017 00:00:00 +0000</pubDate><guid>http://example.org/posts/post1-1c-task/</guid><description>Introduction It so happened that I got into graduate school, and while walking past the department, I stumbled upon an Olympiad problem on 1C. In short, the problem sounds like this: &amp;lsquo;There are sales records for each day, you need to find the longest period when the plan was executed.&amp;rsquo; And then, while walking with my sleeping daughter, I had a question, how many ways can this be done in SQL?</description></item><item><title>Эксперименты над олимпиадной задачей</title><link>http://example.org/posts/post1-1c-task.ru/</link><pubDate>Wed, 03 May 2017 00:00:00 +0000</pubDate><guid>http://example.org/posts/post1-1c-task.ru/</guid><description>Предисловие Так получилось, что я попал в магистратуру, и как то гуляя мимо кафедры на глаза попалась олимпиадная задача по 1С. Кратко задача звучит так: &amp;ldquo;Есть записи продажи за каждый день, необходимо найти наибольший период когда план выполнялся&amp;rdquo;. А потом когда я гулял со спящей дочкой у меня встав вопрос, а сколькими способами это можно сделать на SQL. Решения будут на основе MS SQL.
+Создадим таблицу и начнем
+CREATE TABLE [tmp].</description></item></channel></rss>

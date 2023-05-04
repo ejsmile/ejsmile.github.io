@@ -1,0 +1,385 @@
+<!doctype html><html><head><meta charset=utf-8><meta http-equiv=x-ua-compatible content="IE=edge"><title>Эксперименты над олимпиадной задачей - Pavel Karasov</title><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="Так получилось, что я попал в магистратуру, и как то гуляя мимо кафедры на глаза попалась олимпиадная задача по 1С. Кратко задача звучит так: &#34;Есть записи продажи за каждый день, необходимо найти наибольший период когда план выполнялся&#34;. А потом когда я гулял со спящей дочкой у меня встав вопрос, а сколькими способами это можно сделать на SQL. Решения будут на основе MS SQL."><meta property="og:image" content><meta property="og:title" content="Эксперименты над олимпиадной задачей"><meta property="og:description" content="Так получилось, что я попал в магистратуру, и как то гуляя мимо кафедры на глаза попалась олимпиадная задача по 1С. Кратко задача звучит так: &#34;Есть записи продажи за каждый день, необходимо найти наибольший период когда план выполнялся&#34;. А потом когда я гулял со спящей дочкой у меня встав вопрос, а сколькими способами это можно сделать на SQL. Решения будут на основе MS SQL."><meta property="og:type" content="article"><meta property="og:url" content="http://example.org/posts/post1-1c-task.ru/"><meta property="article:section" content="posts"><meta property="article:published_time" content="2017-05-03T00:00:00+00:00"><meta property="article:modified_time" content="2017-05-03T00:00:00+00:00"><meta name=twitter:card content="summary"><meta name=twitter:title content="Эксперименты над олимпиадной задачей"><meta name=twitter:description content="Так получилось, что я попал в магистратуру, и как то гуляя мимо кафедры на глаза попалась олимпиадная задача по 1С. Кратко задача звучит так: &#34;Есть записи продажи за каждый день, необходимо найти наибольший период когда план выполнялся&#34;. А потом когда я гулял со спящей дочкой у меня встав вопрос, а сколькими способами это можно сделать на SQL. Решения будут на основе MS SQL."><script src=http://example.org/js/feather.min.js></script>
+<link href=http://example.org/css/fonts.2c2227b81b1970a03e760aa2e6121cd01f87c88586803cbb282aa224720a765f.css rel=stylesheet><link rel=stylesheet type=text/css media=screen href=http://example.org/css/main.ac08a4c9714baa859217f92f051deb58df2938ec352b506df655005dcaf98cc0.css><link id=darkModeStyle rel=stylesheet type=text/css href=http://example.org/css/dark.726cd11ca6eb7c4f7d48eb420354f814e5c1b94281aaf8fd0511c1319f7f78a4.css media="(prefers-color-scheme: dark)"></head><body><div class=content><header><div class=main><a href=http://example.org/>Pavel Karasov</a></div><nav><a href=/>Home</a>
+<a href=/posts>All posts</a>
+<a href=/about>About</a></nav></header><main><article><div class=title><h1 class=title>Эксперименты над олимпиадной задачей</h1><div class=meta>Posted on May 3, 2017</div></div><section class=body><h2 id=предисловие>Предисловие</h2><p>Так получилось, что я попал в магистратуру, и как то гуляя мимо кафедры на глаза попалась олимпиадная задача по 1С. Кратко задача звучит так: &ldquo;Есть записи продажи за каждый день, необходимо найти наибольший период когда план выполнялся&rdquo;. А потом когда я гулял со спящей дочкой у меня встав вопрос, а сколькими способами это можно сделать на SQL. Решения будут на основе MS SQL.</p><p>Создадим таблицу и начнем</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>CREATE</span> <span style=color:#66d9ef>TABLE</span> [tmp].[forFindDate](
+</span></span><span style=display:flex><span>	[date] [datetime] <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span>	[value] [int] <span style=color:#66d9ef>NOT</span> <span style=color:#66d9ef>NULL</span>,
+</span></span><span style=display:flex><span> <span style=color:#66d9ef>CONSTRAINT</span> [PK_forFindDate] <span style=color:#66d9ef>PRIMARY</span> <span style=color:#66d9ef>KEY</span> CLUSTERED 
+</span></span><span style=display:flex><span>(
+</span></span><span style=display:flex><span>	[date] <span style=color:#66d9ef>ASC</span>
+</span></span><span style=display:flex><span>)<span style=color:#66d9ef>WITH</span> (PAD_INDEX <span style=color:#f92672>=</span> <span style=color:#66d9ef>OFF</span>, STATISTICS_NORECOMPUTE <span style=color:#f92672>=</span> <span style=color:#66d9ef>OFF</span>, IGNORE_DUP_KEY <span style=color:#f92672>=</span> <span style=color:#66d9ef>OFF</span>, ALLOW_ROW_LOCKS <span style=color:#f92672>=</span> <span style=color:#66d9ef>ON</span>, ALLOW_PAGE_LOCKS <span style=color:#f92672>=</span> <span style=color:#66d9ef>ON</span>) <span style=color:#66d9ef>ON</span> [<span style=color:#66d9ef>PRIMARY</span>]
+</span></span><span style=display:flex><span>) <span style=color:#66d9ef>ON</span> [<span style=color:#66d9ef>PRIMARY</span>]
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>GO</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170401&#39;</span>, <span style=color:#ae81ff>10</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170402&#39;</span>, <span style=color:#ae81ff>20</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170403&#39;</span>, <span style=color:#ae81ff>20</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170404&#39;</span>, <span style=color:#ae81ff>20</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170405&#39;</span>, <span style=color:#ae81ff>10</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170406&#39;</span>, <span style=color:#ae81ff>10</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170407&#39;</span>, <span style=color:#ae81ff>30</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170408&#39;</span>, <span style=color:#ae81ff>36</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170409&#39;</span>, <span style=color:#ae81ff>35</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170410&#39;</span>, <span style=color:#ae81ff>30</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170411&#39;</span>, <span style=color:#ae81ff>30</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170412&#39;</span>, <span style=color:#ae81ff>20</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170413&#39;</span>, <span style=color:#ae81ff>10</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170414&#39;</span>, <span style=color:#ae81ff>40</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170415&#39;</span>, <span style=color:#ae81ff>40</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170416&#39;</span>, <span style=color:#ae81ff>10</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170417&#39;</span>, <span style=color:#ae81ff>50</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170418&#39;</span>, <span style=color:#ae81ff>52</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170419&#39;</span>, <span style=color:#ae81ff>53</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170420&#39;</span>, <span style=color:#ae81ff>53</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170421&#39;</span>, <span style=color:#ae81ff>50</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170422&#39;</span>, <span style=color:#ae81ff>51</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170423&#39;</span>, <span style=color:#ae81ff>52</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170424&#39;</span>, <span style=color:#ae81ff>50</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170425&#39;</span>, <span style=color:#ae81ff>50</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170426&#39;</span>, <span style=color:#ae81ff>50</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170427&#39;</span>, <span style=color:#ae81ff>10</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170428&#39;</span>, <span style=color:#ae81ff>10</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170429&#39;</span>, <span style=color:#ae81ff>10</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>INSERT</span> <span style=color:#66d9ef>INTO</span> [tmp].[forFindDate] ([date], [value]) <span style=color:#66d9ef>VALUES</span> (<span style=color:#e6db74>&#39;20170430&#39;</span>, <span style=color:#ae81ff>10</span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>GO</span>
+</span></span></code></pre></div><h2 id=первый-способ>Первый способ</h2><p>SQl запросы через join на самого себя</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>declare</span> <span style=color:#f92672>@</span>planValue int <span style=color:#f92672>=</span> <span style=color:#ae81ff>15</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>--самый очевидный left
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span><span style=color:#66d9ef>select</span> 	
+</span></span><span style=display:flex><span>	top <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#39;сам на себя&#39;</span>,
+</span></span><span style=display:flex><span>	BeginDate,
+</span></span><span style=display:flex><span>	DATEADD(<span style=color:#66d9ef>Day</span>, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, EndDate) EndDate
+</span></span><span style=display:flex><span><span style=color:#66d9ef>from</span> (<span style=color:#66d9ef>select</span> 
+</span></span><span style=display:flex><span>		s.date BeginDate, 
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>ISNULL</span>(<span style=color:#66d9ef>min</span>(e.date), <span style=color:#e6db74>&#39;20170501&#39;</span>) EndDate
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>from</span> [tmp].[forFindDate] s
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>left</span> <span style=color:#66d9ef>join</span> [tmp].[forFindDate] e
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>on</span>
+</span></span><span style=display:flex><span>				s.date <span style=color:#f92672>&lt;</span> e.date
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>and</span>
+</span></span><span style=display:flex><span>				<span style=color:#66d9ef>not</span> e.value <span style=color:#f92672>&gt;</span> <span style=color:#f92672>@</span>planValue
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>where</span>
+</span></span><span style=display:flex><span>		s.value <span style=color:#f92672>&gt;</span> <span style=color:#f92672>@</span>planValue
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>group</span> <span style=color:#66d9ef>by</span>
+</span></span><span style=display:flex><span>		s.date) tmp
+</span></span><span style=display:flex><span><span style=color:#66d9ef>order</span> <span style=color:#66d9ef>by</span>
+</span></span><span style=display:flex><span>	DATEDIFF(<span style=color:#66d9ef>day</span>, BeginDate, EndDate) <span style=color:#66d9ef>desc</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>-- или как мне нравиться больше через with
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>
+</span></span><span style=display:flex><span>;<span style=color:#66d9ef>with</span> periodDate1 <span style=color:#66d9ef>as</span>(
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>select</span> 
+</span></span><span style=display:flex><span>		s.date BeginDate, 
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>ISNULL</span>(<span style=color:#66d9ef>min</span>(e.date), <span style=color:#e6db74>&#39;20170501&#39;</span>) EndDate
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>from</span> [tmp].[forFindDate] s
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>left</span> <span style=color:#66d9ef>join</span> [tmp].[forFindDate] e
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>on</span>
+</span></span><span style=display:flex><span>				s.date <span style=color:#f92672>&lt;</span> e.date
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>and</span>
+</span></span><span style=display:flex><span>				<span style=color:#66d9ef>not</span> e.value <span style=color:#f92672>&gt;</span> <span style=color:#f92672>@</span>planValue
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>where</span>
+</span></span><span style=display:flex><span>		s.value <span style=color:#f92672>&gt;</span> <span style=color:#f92672>@</span>planValue
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>group</span> <span style=color:#66d9ef>by</span>
+</span></span><span style=display:flex><span>		s.date
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>select</span> 
+</span></span><span style=display:flex><span>	top <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#39;сам на себя (with left)&#39;</span> title,
+</span></span><span style=display:flex><span>	BeginDate,
+</span></span><span style=display:flex><span>	DATEADD(<span style=color:#66d9ef>Day</span>, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, EndDate) EndDate
+</span></span><span style=display:flex><span><span style=color:#66d9ef>from</span> periodDate1
+</span></span><span style=display:flex><span><span style=color:#66d9ef>order</span> <span style=color:#66d9ef>by</span>
+</span></span><span style=display:flex><span>	DATEDIFF(<span style=color:#66d9ef>day</span>, BeginDate, EndDate) <span style=color:#66d9ef>desc</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#75715e>--меняем на full
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>
+</span></span><span style=display:flex><span>;<span style=color:#66d9ef>with</span> periodDate2 <span style=color:#66d9ef>as</span>(
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>select</span> 
+</span></span><span style=display:flex><span>		s.date BeginDate, 
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>ISNULL</span>(<span style=color:#66d9ef>min</span>(e.date), <span style=color:#e6db74>&#39;20170501&#39;</span>) EndDate
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>from</span> [tmp].[forFindDate] s
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>full</span> <span style=color:#66d9ef>join</span> [tmp].[forFindDate] e
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>on</span>
+</span></span><span style=display:flex><span>				s.date <span style=color:#f92672>&lt;</span> e.date
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>and</span>
+</span></span><span style=display:flex><span>				<span style=color:#66d9ef>not</span> e.value <span style=color:#f92672>&gt;</span> <span style=color:#f92672>@</span>planValue
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>where</span>
+</span></span><span style=display:flex><span>		s.value <span style=color:#f92672>&gt;</span> <span style=color:#f92672>@</span>planValue
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>group</span> <span style=color:#66d9ef>by</span>
+</span></span><span style=display:flex><span>		s.date
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>select</span> 
+</span></span><span style=display:flex><span>	top <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#39;сам на себя (with full)&#39;</span> title,
+</span></span><span style=display:flex><span>	BeginDate,
+</span></span><span style=display:flex><span>	DATEADD(<span style=color:#66d9ef>Day</span>, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, EndDate) EndDate
+</span></span><span style=display:flex><span><span style=color:#66d9ef>from</span> periodDate2
+</span></span><span style=display:flex><span><span style=color:#66d9ef>order</span> <span style=color:#66d9ef>by</span>
+</span></span><span style=display:flex><span>	DATEDIFF(<span style=color:#66d9ef>day</span>, BeginDate, EndDate) <span style=color:#66d9ef>desc</span>
+</span></span><span style=display:flex><span><span style=color:#75715e>--меняем на right
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>;<span style=color:#66d9ef>with</span> periodDate3 <span style=color:#66d9ef>as</span>(
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>select</span> 
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>ISNULL</span>(<span style=color:#66d9ef>max</span>(s.date), <span style=color:#e6db74>&#39;20170401&#39;</span>) BeginDate,
+</span></span><span style=display:flex><span>		e.date EndDate
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>from</span> [tmp].[forFindDate] s
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>right</span> <span style=color:#66d9ef>join</span> [tmp].[forFindDate] e
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>on</span>
+</span></span><span style=display:flex><span>				s.date <span style=color:#f92672>&lt;</span> e.date
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>and</span>
+</span></span><span style=display:flex><span>				<span style=color:#66d9ef>not</span> s.value <span style=color:#f92672>&gt;</span> <span style=color:#f92672>@</span>planValue
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>where</span>
+</span></span><span style=display:flex><span>		e.value <span style=color:#f92672>&gt;</span> <span style=color:#f92672>@</span>planValue
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>group</span> <span style=color:#66d9ef>by</span>
+</span></span><span style=display:flex><span>		e.date
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>select</span> 
+</span></span><span style=display:flex><span>	top <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#39;сам на себя (with right)&#39;</span> title,
+</span></span><span style=display:flex><span>	DATEADD(<span style=color:#66d9ef>Day</span>, <span style=color:#ae81ff>1</span>, BeginDate) BeginDate, 
+</span></span><span style=display:flex><span>	EndDate
+</span></span><span style=display:flex><span><span style=color:#66d9ef>from</span> periodDate3
+</span></span><span style=display:flex><span><span style=color:#66d9ef>order</span> <span style=color:#66d9ef>by</span>
+</span></span><span style=display:flex><span>	DATEDIFF(<span style=color:#66d9ef>day</span>, BeginDate, EndDate) <span style=color:#66d9ef>desc</span>
+</span></span></code></pre></div><p>Причем при любом join получим абсолютно одинаковый план (через NESTED LOOP (left outer join)).</p><p>Планы исполнения запросов через join</p><p><figure class=mid><img src=https://habrastorage.org/files/7c5/25f/612/7c525f612b1e47319d27298e7ed1ef80.png></figure><figure class=mid><img src=https://habrastorage.org/files/e32/75a/a65/e3275aa650ae475ba8beea4578141da0.png></figure><figure class=mid><img src=https://habrastorage.org/files/233/b0c/b5e/233b0cb5e05443c2add0194b709134d0.png></figure><figure class=mid><img src=https://habrastorage.org/files/8c3/187/cff/8c3187cff5994ab18c8a6916eb5158d4.png></figure></p><h2 id=второй-способ>Второй способ</h2><p>SQL запросы через корреляционный запрос</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>declare</span> <span style=color:#f92672>@</span>planValue int <span style=color:#f92672>=</span> <span style=color:#ae81ff>15</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>;<span style=color:#66d9ef>with</span> periodDate4 <span style=color:#66d9ef>as</span>(
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>select</span> 
+</span></span><span style=display:flex><span>		s.date BeginDate, 
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>ISNULL</span>((<span style=color:#66d9ef>select</span> DATEADD(<span style=color:#66d9ef>DAY</span>, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, <span style=color:#66d9ef>isNull</span>(<span style=color:#66d9ef>min</span>(d.date), <span style=color:#e6db74>&#39;20170501&#39;</span>)) <span style=color:#66d9ef>from</span> [tmp].[forFindDate] d <span style=color:#66d9ef>where</span> d.date <span style=color:#f92672>&gt;</span> s.date <span style=color:#66d9ef>and</span> <span style=color:#66d9ef>not</span> d.value <span style=color:#f92672>&gt;</span> <span style=color:#f92672>@</span>planValue), <span style=color:#e6db74>&#39;20170501&#39;</span>) EndDate
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>from</span> 
+</span></span><span style=display:flex><span>		[tmp].[forFindDate] s
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>where</span>
+</span></span><span style=display:flex><span>		s.value <span style=color:#f92672>&gt;</span> <span style=color:#f92672>@</span>planValue			
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>select</span> top <span style=color:#ae81ff>1</span> 
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#39;корреляционный запрос&#39;</span>, p.BeginDate, p.EndDate
+</span></span><span style=display:flex><span><span style=color:#66d9ef>from</span> 
+</span></span><span style=display:flex><span>	periodDate4 p 
+</span></span><span style=display:flex><span><span style=color:#66d9ef>order</span> <span style=color:#66d9ef>by</span> 
+</span></span><span style=display:flex><span>	DATEDIFF(<span style=color:#66d9ef>DAY</span>,  p.BeginDate, p.EndDate) <span style=color:#66d9ef>desc</span>
+</span></span></code></pre></div><p>В данном случай мы получаем NESTED LOOP (inner join)).</p><figure class=mid><img src=https://habrastorage.org/files/e93/01b/45f/e9301b45ffd44e718c59cee4e85cb24b.png alt="Планы исполнения корреляционного запроса"><figcaption><p>Планы исполнения корреляционного запроса</p></figcaption></figure><h2 id=третий-способ>Третий способ</h2><p>пока все не интересно, теперь возьмем функцию APPLY (появилась в MS SQL 2005). Фактически на каждую строку будем делать под запрос.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>declare</span> <span style=color:#f92672>@</span>planValue int <span style=color:#f92672>=</span> <span style=color:#ae81ff>15</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>;<span style=color:#66d9ef>with</span> periodDate5 <span style=color:#66d9ef>as</span>(
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>select</span> 
+</span></span><span style=display:flex><span>		s.date BeginDate, 
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>ISNULL</span>(<span style=color:#66d9ef>min</span>(e.date), <span style=color:#e6db74>&#39;20170501&#39;</span>) EndDate
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>from</span> [tmp].[forFindDate] s
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>outer</span> apply
+</span></span><span style=display:flex><span>		(
+</span></span><span style=display:flex><span>		<span style=color:#75715e>--особенностью храненим данных (сортировка по дате)
+</span></span></span><span style=display:flex><span><span style=color:#75715e></span>		<span style=color:#66d9ef>select</span>
+</span></span><span style=display:flex><span>			top <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>				ee.date
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>from</span>
+</span></span><span style=display:flex><span>			[tmp].[forFindDate] ee
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>where</span>
+</span></span><span style=display:flex><span>				s.date <span style=color:#f92672>&lt;</span> ee.date
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>and</span>
+</span></span><span style=display:flex><span>				<span style=color:#66d9ef>not</span> ee.value <span style=color:#f92672>&gt;</span> <span style=color:#f92672>@</span>planValue
+</span></span><span style=display:flex><span>		) e
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>where</span>
+</span></span><span style=display:flex><span>		s.value <span style=color:#f92672>&gt;</span> <span style=color:#f92672>@</span>planValue
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>group</span> <span style=color:#66d9ef>by</span>
+</span></span><span style=display:flex><span>		s.date
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>select</span> 
+</span></span><span style=display:flex><span>	top <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#39;sql 2005 apply&#39;</span> title,
+</span></span><span style=display:flex><span>	BeginDate,
+</span></span><span style=display:flex><span>	DATEADD(<span style=color:#66d9ef>Day</span>, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, EndDate) EndDate
+</span></span><span style=display:flex><span><span style=color:#66d9ef>from</span> periodDate5
+</span></span><span style=display:flex><span><span style=color:#66d9ef>order</span> <span style=color:#66d9ef>by</span>
+</span></span><span style=display:flex><span>	DATEDIFF(<span style=color:#66d9ef>day</span>, BeginDate, EndDate) <span style=color:#66d9ef>desc</span>
+</span></span></code></pre></div><p>В данном случай опять получаем NESTED LOOP (left outer join), но этот способ самый оптимальный на данный момент (по крайне мере так считает MS SQL).</p><figure class=mid><img src=https://habrastorage.org/files/9c7/939/882/9c7939882a40495fa984e17a4e3527cd.png alt="Планы исполнения apply"><figcaption><p>Планы исполнения apply</p></figcaption></figure><p>Пока все было скучно и обыденно.</p><h2 id=четвертый-способ>Четвертый способ</h2><p>Поиграем с рекурсией: к текущей строке будем клеить данные если дата на один день старше и выполняется план продаж. Таким образом будем расширять интервал.</p><p>Т.к. данных не много, то длина последовательности небольшая, как и глубина стека вызовов (CTE recursive возможно начиная с 2005).</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>declare</span> <span style=color:#f92672>@</span>planValue int <span style=color:#f92672>=</span> <span style=color:#ae81ff>15</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>;<span style=color:#66d9ef>with</span> periodDate6 <span style=color:#66d9ef>as</span> (
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>select</span>
+</span></span><span style=display:flex><span>		f.date BeginDate,
+</span></span><span style=display:flex><span>		DATEADD(<span style=color:#66d9ef>day</span>, <span style=color:#ae81ff>1</span>, f.date) EndDate
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>from</span>
+</span></span><span style=display:flex><span>		[tmp].[forFindDate] f
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>where</span>
+</span></span><span style=display:flex><span>		f.date <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;20170417&#39;</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>and</span>
+</span></span><span style=display:flex><span>		f.value <span style=color:#f92672>&gt;</span> <span style=color:#f92672>@</span>planValue
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>union</span> <span style=color:#66d9ef>all</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>select</span>
+</span></span><span style=display:flex><span>		r.BeginDate,
+</span></span><span style=display:flex><span>		DATEADD(<span style=color:#66d9ef>day</span>, <span style=color:#ae81ff>1</span>, f.date) EndDate
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>from</span>
+</span></span><span style=display:flex><span>		[tmp].[forFindDate] f
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>inner</span> <span style=color:#66d9ef>join</span> periodDate6 r
+</span></span><span style=display:flex><span>				<span style=color:#66d9ef>on</span>
+</span></span><span style=display:flex><span>					r.EndDate <span style=color:#f92672>=</span> f.Date
+</span></span><span style=display:flex><span>				<span style=color:#66d9ef>and</span>
+</span></span><span style=display:flex><span>					value <span style=color:#f92672>&gt;</span> <span style=color:#f92672>@</span>planValue
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>select</span> 
+</span></span><span style=display:flex><span>	top <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#39;recursive&#39;</span> title,
+</span></span><span style=display:flex><span>	BeginDate,
+</span></span><span style=display:flex><span>	DATEADD(<span style=color:#66d9ef>Day</span>, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, EndDate) EndDate
+</span></span><span style=display:flex><span><span style=color:#66d9ef>from</span> periodDate6
+</span></span><span style=display:flex><span><span style=color:#66d9ef>order</span> <span style=color:#66d9ef>by</span>
+</span></span><span style=display:flex><span>	DATEDIFF(<span style=color:#66d9ef>day</span>, BeginDate, EndDate) <span style=color:#66d9ef>desc</span>
+</span></span></code></pre></div><figure class=mid><img src=https://habrastorage.org/files/cf2/05b/93b/cf205b93b3384ccf966bf5801b7a6aeb.png alt="Планы cte"><figcaption><p>Планы cte</p></figcaption></figure><h2 id=пятый-способ>Пятый способ</h2><p>Перейдем к возможностям MS SQL 2012 к аналитической функций LEAD (оконные функций). Функция LEAD возвращает следующие значения со сдвигом в пределах секций по сортировке. Секций в данных у нас две: выполнения и не выполнения плана, сортировка нужна по датам, что бы найти максимальный период поступим хитро: будем искать пропуски в не выполнении плана, т.е. потом когда мы сдвинем даты начала вперед, а конец назад, то получим отрезки выполнения плана. В данном случай нам интересна только секция не выполнения плана её и возьмем, но в целом деление можно сделать так <code>sql OVER ( PARTITION BY iif(f.value &lt; @planValue, 1, 0) order by f.date)</code></p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>declare</span> <span style=color:#f92672>@</span>planValue int <span style=color:#f92672>=</span> <span style=color:#ae81ff>15</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>with</span> tmp <span style=color:#66d9ef>as</span> (	
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>select</span> <span style=color:#e6db74>&#39;20170331&#39;</span> [date]
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>union</span> <span style=color:#66d9ef>all</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>select</span>
+</span></span><span style=display:flex><span>		date 
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>from</span> [tmp].[forFindDate] f
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>where</span>
+</span></span><span style=display:flex><span>		f.value <span style=color:#f92672>&lt;</span> <span style=color:#f92672>@</span>planValue
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>union</span> <span style=color:#66d9ef>all</span>
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>select</span> <span style=color:#e6db74>&#39;20170501&#39;</span>	
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>), periodDate4 <span style=color:#66d9ef>as</span> (
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>select</span>
+</span></span><span style=display:flex><span>		date beforDate,
+</span></span><span style=display:flex><span>		lead(f.date, <span style=color:#ae81ff>1</span>, <span style=color:#e6db74>&#39;20170501&#39;</span>)
+</span></span><span style=display:flex><span>		OVER (<span style=color:#66d9ef>order</span> <span style=color:#66d9ef>by</span> f.date) afterDate
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>from</span> tmp f
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>select</span> 
+</span></span><span style=display:flex><span>	top <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#39;func 2012 t&#39;</span> title,
+</span></span><span style=display:flex><span>	DATEADD(<span style=color:#66d9ef>Day</span>, <span style=color:#ae81ff>1</span>, beforDate) BeginDate,
+</span></span><span style=display:flex><span>	DATEADD(<span style=color:#66d9ef>Day</span>, <span style=color:#f92672>-</span><span style=color:#ae81ff>1</span>, afterDate) EndDate
+</span></span><span style=display:flex><span><span style=color:#66d9ef>from</span> periodDate4
+</span></span><span style=display:flex><span><span style=color:#66d9ef>order</span> <span style=color:#66d9ef>by</span>
+</span></span><span style=display:flex><span>	DATEDIFF(<span style=color:#66d9ef>day</span>, beforDate, afterDate) <span style=color:#66d9ef>desc</span>
+</span></span></code></pre></div><p>На плане исполнения видно, что не происходит соединения таблиц, за исключение добавления дат вне отрезка для корректной работы с концами отрезков.</p><figure class=mid><img src=https://habrastorage.org/web/236/032/9f9/2360329f9d174b8e8b4ed94de28848ac alt="Планы оконной функций"><figcaption><p>Планы оконной функций</p></figcaption></figure><h2 id=шестой-способ>Шестой способ</h2><p>А теперь побалуемся перемножим таблицу саму на себя (декартого произведение): найдем все возможные сочетания дат (30*30 = 900), отберем те у которых дата начало меньше даты конца и в этом интервале нет события не исполнения плана.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>declare</span> <span style=color:#f92672>@</span>planValue int <span style=color:#f92672>=</span> <span style=color:#ae81ff>15</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>;<span style=color:#66d9ef>with</span> periodDate8 <span style=color:#66d9ef>as</span>(
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>select</span> 
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>ISNULL</span>(s.date, <span style=color:#e6db74>&#39;20170401&#39;</span>) BeginDate, 
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>ISNULL</span>(e.date, <span style=color:#e6db74>&#39;20170501&#39;</span>) EndDate
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>from</span> [tmp].[forFindDate] s, [tmp].[forFindDate] e
+</span></span><span style=display:flex><span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>select</span> top <span style=color:#ae81ff>1</span> 
+</span></span><span style=display:flex><span>	<span style=color:#e6db74>&#39;for Fun&#39;</span>, p.BeginDate, p.EndDate
+</span></span><span style=display:flex><span><span style=color:#66d9ef>from</span> periodDate8 p 
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>left</span> <span style=color:#66d9ef>join</span> [tmp].[forFindDate] b
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>on</span>
+</span></span><span style=display:flex><span>			b.date <span style=color:#66d9ef>between</span> p.BeginDate <span style=color:#66d9ef>and</span> p.EndDate
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>and</span>
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>not</span> b.value <span style=color:#f92672>&gt;</span> <span style=color:#f92672>@</span>planValue
+</span></span><span style=display:flex><span><span style=color:#66d9ef>where</span>
+</span></span><span style=display:flex><span>	p.BeginDate <span style=color:#f92672>&lt;</span> p.EndDate
+</span></span><span style=display:flex><span><span style=color:#66d9ef>and</span>
+</span></span><span style=display:flex><span>	b.date <span style=color:#66d9ef>is</span> <span style=color:#66d9ef>null</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>order</span> <span style=color:#66d9ef>by</span>
+</span></span><span style=display:flex><span>	DATEDIFF(<span style=color:#66d9ef>day</span>, BeginDate, EndDate) <span style=color:#66d9ef>desc</span>
+</span></span></code></pre></div><p>Самый медленный и тяжелый способ. Но мы гонимся не за производительностью, а за количество решений задачи.</p><figure class=mid><img src=https://habrastorage.org/files/e3b/484/d1f/e3b484d1fce343db8e05f25655ed93e2.png alt="Планы декартового произведение"><figcaption><p>Планы декартового произведение</p></figcaption></figure><h2 id=седьмой-способ>Седьмой способ</h2><p>Обычный курсор. По перебираем данные у которых план выполнен, и ищем максимальный последовательный участок.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>declare</span> <span style=color:#f92672>@</span>planValue int <span style=color:#f92672>=</span> <span style=color:#ae81ff>15</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>declare</span> <span style=color:#f92672>@</span>endDate datetime <span style=color:#f92672>=</span> <span style=color:#66d9ef>null</span>, 
+</span></span><span style=display:flex><span>		<span style=color:#f92672>@</span>Intervat int <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>,
+</span></span><span style=display:flex><span>		<span style=color:#f92672>@</span>maxIntervat int <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>, 
+</span></span><span style=display:flex><span>		<span style=color:#f92672>@</span>old_date datetime <span style=color:#f92672>=</span> <span style=color:#e6db74>&#39;20170401&#39;</span>, 
+</span></span><span style=display:flex><span>		<span style=color:#f92672>@</span>cur_date datetime
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>DECLARE</span> date_cursor <span style=color:#66d9ef>CURSOR</span>  
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>FOR</span> <span style=color:#66d9ef>SELECT</span> date <span style=color:#66d9ef>FROM</span> [tmp].[forFindDate] <span style=color:#66d9ef>where</span> value <span style=color:#f92672>&gt;</span> <span style=color:#f92672>@</span>planValue
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>OPEN</span> date_cursor  
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>FETCH</span> <span style=color:#66d9ef>NEXT</span> <span style=color:#66d9ef>FROM</span> date_cursor 
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>INTO</span> <span style=color:#f92672>@</span>cur_date  
+</span></span><span style=display:flex><span>		WHILE <span style=color:#f92672>@@</span>FETCH_STATUS <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>  
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>IF</span> (<span style=color:#f92672>@</span>cur_date <span style=color:#f92672>=</span> DATEADD(<span style=color:#66d9ef>DAY</span>, <span style=color:#ae81ff>1</span>, <span style=color:#f92672>@</span>old_date)) <span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>				<span style=color:#66d9ef>SET</span> <span style=color:#f92672>@</span>Intervat <span style=color:#f92672>=</span> <span style=color:#f92672>@</span>Intervat <span style=color:#f92672>+</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>				<span style=color:#66d9ef>IF</span>(<span style=color:#f92672>@</span>Intervat <span style=color:#f92672>&gt;</span> <span style=color:#f92672>@</span>maxIntervat) <span style=color:#66d9ef>BEGIN</span>
+</span></span><span style=display:flex><span>					<span style=color:#66d9ef>SET</span> <span style=color:#f92672>@</span>maxIntervat <span style=color:#f92672>=</span> <span style=color:#f92672>@</span>Intervat
+</span></span><span style=display:flex><span>					<span style=color:#66d9ef>SET</span> <span style=color:#f92672>@</span>endDate <span style=color:#f92672>=</span> <span style=color:#f92672>@</span>cur_date
+</span></span><span style=display:flex><span>				<span style=color:#66d9ef>END</span>
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>END</span> <span style=color:#66d9ef>else</span> 
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>Begin</span>
+</span></span><span style=display:flex><span>				<span style=color:#66d9ef>set</span> <span style=color:#f92672>@</span>Intervat <span style=color:#f92672>=</span> <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>end</span>
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>SET</span> <span style=color:#f92672>@</span>old_date <span style=color:#f92672>=</span> <span style=color:#f92672>@</span>cur_date
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>FETCH</span> <span style=color:#66d9ef>NEXT</span> <span style=color:#66d9ef>FROM</span> date_cursor 
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>INTO</span> <span style=color:#f92672>@</span>cur_date
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>END</span>   
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>CLOSE</span> date_cursor;  
+</span></span><span style=display:flex><span><span style=color:#66d9ef>DEALLOCATE</span> date_cursor;  
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>select</span> <span style=color:#e6db74>&#39;cursor&#39;</span> title, DATEADD(<span style=color:#66d9ef>DAY</span>, <span style=color:#f92672>-</span> <span style=color:#f92672>@</span>maxIntervat, <span style=color:#f92672>@</span>endDate) BeginDate, <span style=color:#f92672>@</span>endDate EndDate
+</span></span></code></pre></div><h2 id=не-мой-варианты>Не мой варианты</h2><p>Через оконный функций найдем переходы, между состояниями выполнено/не выполнение плана. И потом подбор интервалов. Могут быть проблемы из-за того, что интервал начался с выполнения плана или закончился выполнение плана, то не произойдет переход и данные подберутся не верно.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>declare</span> <span style=color:#f92672>@</span>planValue int <span style=color:#f92672>=</span> <span style=color:#ae81ff>15</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>;<span style=color:#66d9ef>WITH</span> Step01 <span style=color:#66d9ef>AS</span>
+</span></span><span style=display:flex><span>    (<span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>            <span style=color:#f92672>*</span>
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>FROM</span>
+</span></span><span style=display:flex><span>            tmp.forFindDate
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>WHERE</span>     
+</span></span><span style=display:flex><span>            value <span style=color:#f92672>&gt;</span> <span style=color:#f92672>@</span>planValue
+</span></span><span style=display:flex><span>	)
+</span></span><span style=display:flex><span>, Step02 <span style=color:#66d9ef>AS</span>
+</span></span><span style=display:flex><span>	(<span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>		date
+</span></span><span style=display:flex><span>		, <span style=color:#66d9ef>CASE</span>
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>WHEN</span> date <span style=color:#f92672>-</span> LAG([date], <span style=color:#ae81ff>1</span>, <span style=color:#e6db74>&#39;20170401&#39;</span>) OVER(<span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> date)  <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>THEN</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>ELSE</span> <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>END</span> <span style=color:#66d9ef>AS</span> isStart
+</span></span><span style=display:flex><span>		, <span style=color:#66d9ef>CASE</span>
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>WHEN</span> LEAD([date], <span style=color:#ae81ff>1</span>, <span style=color:#e6db74>&#39;20170430&#39;</span>) OVER(<span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> date) <span style=color:#f92672>-</span> date <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>THEN</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>ELSE</span> <span style=color:#ae81ff>0</span>
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>END</span> <span style=color:#66d9ef>AS</span> isEnd
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span>
+</span></span><span style=display:flex><span>		Step01)
+</span></span><span style=display:flex><span>, Step03 <span style=color:#66d9ef>AS</span> (
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>		
+</span></span><span style=display:flex><span>		date <span style=color:#66d9ef>AS</span> rangestart
+</span></span><span style=display:flex><span>		, <span style=color:#66d9ef>CASE</span>
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>WHEN</span> isEnd <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>THEN</span> date
+</span></span><span style=display:flex><span>			<span style=color:#66d9ef>ELSE</span> LEAD(date, <span style=color:#ae81ff>1</span>) OVER(<span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> date)
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>END</span> <span style=color:#66d9ef>AS</span>  rangeend
+</span></span><span style=display:flex><span>		, isstart
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span>
+</span></span><span style=display:flex><span>		Step02
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span>     
+</span></span><span style=display:flex><span>	isstart <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>		<span style=color:#66d9ef>OR</span> isend <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>)
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> TOP <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>	rangestart
+</span></span><span style=display:flex><span>	, rangeend
+</span></span><span style=display:flex><span>	, DATEDIFF(<span style=color:#66d9ef>day</span>, rangestart, rangeend) <span style=color:#66d9ef>AS</span> <span style=color:#e6db74>&#39;дни&#39;</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span>
+</span></span><span style=display:flex><span>	Step03
+</span></span><span style=display:flex><span><span style=color:#66d9ef>WHERE</span>     
+</span></span><span style=display:flex><span>	isstart <span style=color:#f92672>=</span> <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> <span style=color:#e6db74>&#39;дни&#39;</span> <span style=color:#66d9ef>DESC</span>
+</span></span></code></pre></div><p>С определение интервалов по сдвигу дат: последовательно идущие даты имеют одинаковое приращения по дням, как обычный инкремент по строкам. На это свойстве можно получить какое то смещения и если смещения у нескольких дат совпадает при росте инкремента, то эти даты идут последовательно.</p><div class=highlight><pre tabindex=0 style=color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-sql data-lang=sql><span style=display:flex><span><span style=color:#66d9ef>declare</span> <span style=color:#f92672>@</span>planValue int <span style=color:#f92672>=</span> <span style=color:#ae81ff>15</span>
+</span></span><span style=display:flex><span>
+</span></span><span style=display:flex><span>;<span style=color:#66d9ef>with</span> internals <span style=color:#66d9ef>AS</span> (
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>SELECT</span>
+</span></span><span style=display:flex><span>		dateadd(<span style=color:#66d9ef>day</span>, <span style=color:#f92672>-</span>ROW_NUMBER() OVER (<span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> date), [date]) fake_start,
+</span></span><span style=display:flex><span>		[date]
+</span></span><span style=display:flex><span>    <span style=color:#66d9ef>FROM</span> tmp.forFindDate 
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>where</span> 
+</span></span><span style=display:flex><span>		value <span style=color:#f92672>&gt;</span> <span style=color:#ae81ff>15</span>
+</span></span><span style=display:flex><span>  )
+</span></span><span style=display:flex><span><span style=color:#66d9ef>SELECT</span> TOP <span style=color:#ae81ff>1</span>
+</span></span><span style=display:flex><span>  <span style=color:#e6db74>&#39;new method&#39;</span> <span style=color:#66d9ef>as</span> title,
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>MIN</span>([date]) <span style=color:#66d9ef>AS</span> BeginDate,
+</span></span><span style=display:flex><span>  <span style=color:#66d9ef>MAX</span>([date]) <span style=color:#66d9ef>AS</span> EndDate
+</span></span><span style=display:flex><span><span style=color:#66d9ef>FROM</span> 
+</span></span><span style=display:flex><span>	internals
+</span></span><span style=display:flex><span><span style=color:#66d9ef>GROUP</span> <span style=color:#66d9ef>BY</span> 
+</span></span><span style=display:flex><span>	fake_start
+</span></span><span style=display:flex><span><span style=color:#66d9ef>ORDER</span> <span style=color:#66d9ef>BY</span> 
+</span></span><span style=display:flex><span>	<span style=color:#66d9ef>COUNT</span>(<span style=color:#f92672>*</span>) <span style=color:#66d9ef>DESC</span>
+</span></span></code></pre></div><p><a href=https://habrahabr.ru/post/327862/>habrahabr.ru</a></p></section><div class=post-tags><nav class="nav tags"><ul class=tags><li><a href=/tags/sql>sql</a></li><li><a href=/tags/ms-sql-server>ms sql server</a></li><li><a href=/tags/ms-sql>ms sql</a></li><li><a href=/tags/development>development</a></li></ul></nav></div></article></main><footer><div style=display:flex><a class=soc href=https://github.com/ejsmile rel=me title=GitHub><i data-feather=github></i></a>
+<a class=border></a><a class=soc href=http://www.linkedin.com/in/pavel-karasov rel=me title=Linkedin><i data-feather=linkedin></i></a>
+<a class=border></a><a class=soc href=mailto:pavel@karasov.net rel=me title=Gmail><i data-feather=mail></i></a>
+<a class=border></a><a class=soc href=https://t.me/PavelKarasov rel=me title=Telegram><i data-feather=message-circle></i></a>
+<a class=border></a></div><div class=footer-info>2023 by Pavel Karasov | <a href=https://github.com/athul/archie>Archie Theme</a> | Built with <a href=https://gohugo.io>Hugo</a></div></footer><script>feather.replace()</script></div></body></html>
